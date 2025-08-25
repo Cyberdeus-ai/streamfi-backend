@@ -4,6 +4,8 @@ import dotenv from "dotenv";
 import bodyParser from "body-parser";
 const cors = require("cors");
 
+import router from "./routes";
+
 dotenv.config();
 
 const app: express.Application = express();
@@ -11,6 +13,7 @@ const app: express.Application = express();
 app.use(cors());
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
+app.use(router);
 
 const port = process.env.PORT || 5000;
 

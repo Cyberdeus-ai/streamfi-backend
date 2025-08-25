@@ -1,5 +1,6 @@
 import 'reflect-metadata';
 import { DataSource } from 'typeorm';
+import { User, Campaign, Post, Score } from '../entities';
 
 export const AppDataSource = new DataSource({
     type: 'postgres',
@@ -10,7 +11,7 @@ export const AppDataSource = new DataSource({
     database: 'streamfi',
     synchronize: true,
     logging: true,
-    entities: [],
+    entities: [User, Campaign, Post, Score],
     migrations: [],
     subscribers: [],
 });
