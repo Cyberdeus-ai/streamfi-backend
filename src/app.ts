@@ -5,6 +5,7 @@ import bodyParser from "body-parser";
 const cors = require("cors");
 
 import router from "./routes";
+import { errorHandler } from './middlewares/errorHandler';
 
 dotenv.config();
 
@@ -13,7 +14,8 @@ const app: express.Application = express();
 app.use(cors());
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
-app.use(router);
+app.use('/api', router);
+app.use(errorHandler);
 
 const port = process.env.PORT || 5000;
 

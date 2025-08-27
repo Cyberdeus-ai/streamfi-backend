@@ -12,13 +12,16 @@ export class User extends Model
     name: string;
 
     @Column({ unique: true, length: 100 })
-    username: string;
+    email: string;
 
     @Column({ unique: true, length: 100 })
-    walletAddress: string;
+    wallet_address: string;
 
     @Column({ length: 100 })
-    password: string;
+    twitter_account: string;
+
+    @Column({ length: 100 })
+    account_type: string;
 
     @OneToMany(() => Campaign, (campaign) => campaign.user)
     campaigns: Campaign[];
