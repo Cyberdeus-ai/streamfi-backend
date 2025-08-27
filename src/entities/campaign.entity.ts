@@ -13,20 +13,20 @@ export class Campaign extends Model
     @Column()
     end_date: Date;
 
-    @Column('text', { array: true })
-    hashtags: string[];
+    @Column('text')
+    hashtags: string;
 
-    @Column('text', { array: true })
-    tickers: string[];
+    @Column('text')
+    tickers: string;
 
-    @Column('text', { array: true })
-    handles: string[];
+    @Column('text')
+    handles: string;
 
     @Column({ type: 'double precision' })
     reward_pool: number;
 
-    @Column('text', { array: true })
-    big_accounts: string[];
+    @Column('text')
+    big_accounts: string;
 
     @OneToMany(() => Post, (post) => post.campaign)
     posts: Post[];

@@ -1,7 +1,7 @@
 import { DeepPartial } from 'typeorm';
 
 import { AppDataSource } from '../utils/data-source';
-import { User } from '../entities/user.entity';
+import { User } from '../entities';
 
 const userRepo = AppDataSource.getRepository(User);
 
