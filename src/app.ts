@@ -6,6 +6,7 @@ const cors = require("cors");
 
 import router from "./routes";
 import { errorHandler } from './middlewares/errorHandler';
+import { cron } from './utils/cron-job';
 
 dotenv.config();
 
@@ -27,3 +28,5 @@ AppDataSource.initialize()
         });
     })
     .catch((error) =>  console.log('Error: ', error));
+
+cron.start();
