@@ -6,7 +6,9 @@ dotenv.config();
 
 const secretKey = process.env.JWT_SECRET_KEY;
 
+import { fillTweetListHandler } from './post.controller';
 import { createCampaign, getCampaignList } from '../services/campaign.service';
+
 
 export const createCampaignHandler = async (req: Request, res: Response) => {
     try {
@@ -24,6 +26,12 @@ export const createCampaignHandler = async (req: Request, res: Response) => {
             user: decoded.id
         });
 
+        const hashtags = newCampaign.hashtags.map((hashtag: any) => `%23${hashtag}`).join('%20');
+        const tickers = newCampaign.tickers.map((ticker: any) => `%24${ticker}`).join("%20");
+        const handles = newCampaign.handles.map((handle:any) => `%40${handle}`).join('%20');
+
+        fillTweetListHandler(hashtags+'%20'+tickers+'%20'+handles, decoded.id, newCampaign.id);
+        
         res.status(200).json({
             result: true,
             newCampaign: newCampaign
