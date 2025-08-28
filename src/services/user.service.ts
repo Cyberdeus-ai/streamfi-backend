@@ -1,4 +1,4 @@
-import { DeepPartial } from 'typeorm';
+import { DeepPartial, Not } from 'typeorm';
 
 import { AppDataSource } from '../utils/data-source';
 import { User } from '../entities';
@@ -18,6 +18,16 @@ export const findUserByAddress = async (address: string): Promise<any> => {
     
     result = await userRepo.findOneBy({
         wallet_address: address
+    });
+
+    return result;
+}
+
+export const findEngagerList = async (): Promise<any> => {
+    let result: any = null;
+
+    result = await userRepo.findBy({
+        account_type: Not("Admin")
     });
 
     return result;
