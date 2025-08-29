@@ -1,45 +1,53 @@
 import { Request, Response, NextFunction } from 'express';
-import { ethers, id } from "ethers";
+import { generateNonce, SiweMessage } from 'siwe';
 const jwt = require('jsonwebtoken');
 const dotenv = require('dotenv');
 
 dotenv.config();
 
-import { createUser, findUserByAddress } from "../services/user.service";
+import { createUser, findUserByAddress, findUserByTwitterAccount } from "../services/user.service";
 
-const provider = new ethers.JsonRpcProvider("https://mainnet.infura.io/v3/2c6837284b0c42c2b2c4fb407d785e77");
-
-const getProfileFromAddress = async (address: string) => {
+export const getNonceHandler = async (_req: Request, res: Response, _next: NextFunction) => {
     try {
-        const ensName = await provider.lookupAddress(address);
-        if (ensName) {
-            console.log(`${address} resolves to ENS name: ${ensName}`);
-
-            const profile = await getENSProfile(ensName);
-            console.log("User Profile:", profile);
-            return profile;
-        } else {
-            console.log(`${address} does not have an associated ENS name.`);
-            return null;
-        }
-    } catch (error) {
-        console.error("Error resolving wallet address:", error);
+        const nonce = generateNonce();
+        res.status(200).json({
+            result: true,
+            nonce: nonce
+        })
+    } catch (err) {
+        console.error(err);
+        res.status(500).send(err);
     }
 }
 
-const getENSProfile = async (ensName: string) => {
+export const verifyHandler = async (req: Request, res: Response, _next: NextFunction) => {
     try {
-        const resolver = await provider.getResolver(ensName);
-        if(resolver) {
-            const email = await resolver.getText("email");
-            const name = await resolver.getText("name");
-            return { email, name };
-        } else {
-            console.log(`No resolver found for ENS name: ${ensName}`);
-            return null;
+        if(!req.body.message) {
+            res.status(400).json('Expected prepareMessage object as body.');
+            return;
         }
+
+        if(!req.body.address) {
+            res.status(400).json('Wallet Address is required.');
+            return;
+        }
+        
+        const exist = await findUserByAddress(req.body.address);
+
+        if(exist) {
+            res.status(409).json("Already Sign up");
+            return;
+        }
+
+        let SIWEObject = new SiweMessage(req.body.message);
+        const {data: message} = await SIWEObject.verify({signature: req.body.signature, nonce: req.body.nonce});
+
+        res.status(200).json({
+            result: message.nonce === req.body.nonce && message.address === req.body.address
+        });
     } catch (err) {
-        console.error("Error fetching ENS profile:", err);    
+        console.error(err);
+        res.status(500).send(err);
     }
 }
 
@@ -49,16 +57,14 @@ export const signUpHandler = async (req: Request, res: Response, _next: NextFunc
             res.status(400).json("Not Fill wallet address");
         }
 
-        const profile = await getProfileFromAddress(req.body.address);
+        const exist = await findUserByTwitterAccount(req.body.twitterAccount);
 
-        if(profile === null){
-            return res.status(401).json("Wallet Address Not Found")
+        if(exist) {
+            res.status(409).json("Twitter account already Exist");
         }
 
         await createUser({
-            name: profile?.name ?? "",
             wallet_address: req.body.address,
-            email: profile?.email ?? "",
             twitter_account: req.body.twitterAccount,
             account_type: req.body.accountType,
             campaigns: [],

@@ -23,6 +23,16 @@ export const findUserByAddress = async (address: string): Promise<any> => {
     return result;
 }
 
+export const findUserByTwitterAccount = async (twitterAccount: string): Promise<any> => {
+    let result: any = null;
+
+    result = await userRepo.findOneBy({
+        twitter_account: twitterAccount
+    });
+
+    return result;
+}
+
 export const findEngagerList = async (): Promise<any> => {
     let result: any = null;
 
