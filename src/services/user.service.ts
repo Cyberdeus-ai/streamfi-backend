@@ -13,6 +13,14 @@ export const createUser = async (input: DeepPartial<User>): Promise<any> => {
     return result;
 }
 
+export const findUserByCondition = async (condition: any): Promise<any> => {
+    let result: any = null;
+
+    result = await userRepo.findOneBy(condition);
+
+    return result;
+}
+
 export const findUserByAddress = async (address: string): Promise<any> => {
     let result: any = null;
     
