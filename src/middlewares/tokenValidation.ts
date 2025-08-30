@@ -12,11 +12,7 @@ dotenv.config();
 export async function tokenValidation(req: Request, res: Response, next: NextFunction) {
     try {
         if (String(req.headers.authorization).length < 10) {
-            res.status(401).json({
-                error: {
-                    message: "Token is empty"
-                }
-            });
+            res.status(401).json("Token is empty");
         }
 
         const token = req.headers.authorization?.split(" ")[1];
@@ -33,11 +29,7 @@ export async function tokenValidation(req: Request, res: Response, next: NextFun
         });
 
         if (!user) {
-            return res.status(401).json({
-                error: {
-                    message: "Invalid token"
-                }
-            });
+            return res.status(401).json("Invalid token");
         } else {
             next();
         }
