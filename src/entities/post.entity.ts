@@ -17,6 +17,9 @@ export class Post extends Model
     @Column({ type: 'timestamptz', precision: 3, default: () => `now()` })
     timestamp: Date;
 
+    @Column({ length: 100 })
+    tweet_account: string;
+
     @OneToMany(() => Score, (score) => score.post)
     scores: Score[];
     
