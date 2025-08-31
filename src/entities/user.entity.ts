@@ -1,4 +1,4 @@
-import { Entity, Column, OneToMany } from "typeorm";
+import { Entity, Column, OneToMany, OneToOne } from "typeorm";
 
 import Model from "./model.entity";
 import { Campaign } from "./campaign.entity";
@@ -10,9 +10,6 @@ export class User extends Model
 {
     @Column({ unique: true, length: 100 })
     wallet_address: string;
-
-    @Column({ length: 100 })
-    twitter_account: string;
 
     @Column({ length: 100 })
     account_type: string;
