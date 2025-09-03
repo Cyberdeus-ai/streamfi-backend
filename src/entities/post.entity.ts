@@ -1,9 +1,10 @@
-import { Entity, Column, JoinColumn, ManyToOne, OneToMany } from "typeorm";
+import { Entity, Column, JoinColumn, ManyToOne, OneToMany, OneToOne } from "typeorm";
 
 import Model from './model.entity';
 import { Campaign } from "./campaign.entity";
 import { User } from "./user.entity";
 import { Score } from "./score.entity";
+import { Continuation } from "./continuation.entity";
 
 @Entity()
 export class Post extends Model
@@ -17,11 +18,11 @@ export class Post extends Model
     @Column({ type: 'timestamptz', precision: 3, default: () => `now()` })
     timestamp: Date;
 
-    @Column({ length: 100 })
-    tweet_account: string;
-
     @OneToMany(() => Score, (score) => score.post)
     scores: Score[];
+
+    @OneToOne(() => Continuation, (continuation) => continuation.post)
+    continuation: Continuation;
     
     @ManyToOne(() => User, (user) => user.posts)
     @JoinColumn({ name: 'user_id' })

@@ -1,6 +1,8 @@
 import moment from "moment";
 import { findScoreList, saveScore, findScoreByCondition, updateScore } from '../services/score.service';
+import { findEngagerList } from "../services/user.service";
 import scoreConfig from "../config/score.config";
+import { findPostList } from "../services/post.service";
 
 export const getScoreListHandler = async () => {
     try {
@@ -12,38 +14,56 @@ export const getScoreListHandler = async () => {
     }
 }
 
-export const setScoreByAccountHandler = async (userId: number, profile: any) => {
+export const setScoreByAccountHandler = async () => {
     try {
-        let result: number = 0;
+        const engagerList = await findEngagerList();
 
-        if(profile.is_blue_verified || profile.is_verified) {
-            result += scoreConfig.verification;
-        }
+        Promise.all([
+            engagerList.map(async (user: any) => {
+                let score: number = 0;
+                let profile = user.xaccount;
 
-        result += profile.follower_count / 100000 * scoreConfig.bigAccounts;
-        
-        result += (new Date().getTime() - new Date(profile.created_at).getTime()) / 1000 / 3600 / 86400 * scoreConfig.accountAge;
+                if (profile.is_blue_verified || profile.is_verified) {
+                    score += scoreConfig.verification;
+                }
 
-        const exist = await findScoreByCondition({
-            user: userId,
-            post: null
-        });
-        
-        if(exist) await saveScore(userId, result);
-        else await updateScore(userId, result);
+                score += profile.follower_count / 100000 * scoreConfig.bigAccounts;
+
+                score += (new Date().getTime() - new Date(profile.created_at).getTime()) / 1000 / 3600 / 8760 * scoreConfig.accountAge;
+                
+                return await updateScore(user.id, score);
+            })
+        ]);
     } catch (err) {
         console.error(err);
         return null;
     }
 }
 
-export const setScoreByPostHandler = async (engageType: keyof typeof scoreConfig.engage, userId: number, postId: number) => {
+export const setScoreByPostHandler = async () => {
     try {
-        let result: number = 0;
-        
-        result += scoreConfig.engage[engageType];
+        const postList = await findPostList();
 
-        await saveScore(userId, result, postId);
+        Promise.all([
+            postList.map(async (post: any) => {
+                let score: number = 0;
+
+                switch (post.type) {
+                    case "quote":
+                        score = scoreConfig.engage.quote;
+                        break;
+                    case "reply":
+                        score = scoreConfig.engage.reply;
+                        break;
+                    case "retweet":
+                        score = scoreConfig.engage.retweet;
+                        break;
+                    default:
+                        break;
+                }
+                await saveScore(post.user.id, score, post.id);
+            })
+        ])
     } catch (err) {
         console.error(err);
         return null;

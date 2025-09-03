@@ -4,6 +4,7 @@ import Model from "./model.entity";
 import { Campaign } from "./campaign.entity";
 import { Post } from "./post.entity";
 import { Score } from "./score.entity";
+import { XAccount } from "./xaccount.entity";
 
 @Entity()
 export class User extends Model
@@ -13,6 +14,9 @@ export class User extends Model
 
     @Column({ length: 100 })
     account_type: string;
+
+    @OneToOne(() => XAccount, (xaccount) => xaccount.user)
+    xaccount: XAccount;
 
     @OneToMany(() => Campaign, (campaign) => campaign.user)
     campaigns: Campaign[];

@@ -7,14 +7,21 @@ import {
   fillRetweetListHandler
 } from "../controllers/post.controller";
 
+import { getEngagerListHandler } from '../controllers/user.controller';
+
+import { setScoreByAccountHandler, setScoreByPostHandler } from "../controllers/score.controller";
+
 const getQuotesRepliesAndRTs = async () => {
   try {
     // const tweetList = await getTweetListHandler();
+    // const engagerList = await getEngagerListHandler();
     // if (tweetList && tweetList.length > 0) {
-    //   await fillQuoteListHandler(tweetList);
-    //   await fillReplyListHandler(tweetList); 
-    //   await fillRetweetListHandler(tweetList);
+    //   await fillQuoteListHandler(tweetList, engagerList);
+    //   await fillReplyListHandler(tweetList, engagerList);
+    //   await fillRetweetListHandler(tweetList, engagerList);
     // }
+    await setScoreByAccountHandler();
+    // await setScoreByPostHandler();
     return console.log("Cron Job is running!");
   } catch (err) {
     return console.error(err);

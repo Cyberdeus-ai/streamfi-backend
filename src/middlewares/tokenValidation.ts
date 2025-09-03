@@ -34,7 +34,7 @@ export async function tokenValidation(req: Request, res: Response, next: NextFun
             next();
         }
     } catch (err) {
-        console.log(err);
+        console.error(err);
         res.status(500).send(err);
     }
 }

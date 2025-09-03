@@ -1,5 +1,6 @@
 import { Request, Response, NextFunction } from 'express';
 import { generateNonce, SiweMessage } from 'siwe';
+import moment from 'moment';
 const jwt = require('jsonwebtoken');
 const dotenv = require('dotenv');
 
@@ -7,7 +8,7 @@ dotenv.config();
 
 import { saveUser, updateUser, findUserByCondition } from "../services/user.service";
 import { findProfileByCondition, saveProfile } from "../services/xaccount.service";
-import { getTwitterAccount } from '../utils/scrapter';
+import { getTwitterAccount } from '../utils/scraper';
 
 export const getNonceHandler = async (_req: Request, res: Response, _next: NextFunction) => {
     try {
@@ -79,7 +80,7 @@ export const signUpHandler = async (req: Request, res: Response, _next: NextFunc
         const twitterAccount = JSON.parse(await getTwitterAccount(req.body.twitterAccount));
 
         if (twitterAccount?.user_id) {
-            await saveProfile({
+            saveProfile({
                 id: twitterAccount.user_id,
                 username: twitterAccount.username,
                 name: twitterAccount.name,
@@ -89,7 +90,7 @@ export const signUpHandler = async (req: Request, res: Response, _next: NextFunc
                 profile_pic_url: twitterAccount.profile_image_url,
                 number_of_tweets: twitterAccount.number_of_tweets,
                 bot: twitterAccount.bot,
-                timestamp: twitterAccount.timestamp,
+                created_at: moment(twitterAccount.timestamp * 1000),
                 user: user.id
             });
         }
@@ -136,7 +137,7 @@ export const signInHandler = async (req: Request, res: Response, _next: NextFunc
         const token = jwt.sign(payload, secretKey!, options);
 
         const profile = await findProfileByCondition({
-            user_id: user.id
+            user: user.id
         });
 
         res.status(200).json({
@@ -170,7 +171,7 @@ export const signInWithTokenHandler = async (req: Request, res: Response, _next:
         const newToken = jwt.sign(payload, secretKey!, options);
 
         const profile = await findProfileByCondition({
-            user_id: user.id
+            user: user.id
         });
 
         res.status(200).json({

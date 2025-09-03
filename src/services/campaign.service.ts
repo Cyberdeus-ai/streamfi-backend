@@ -16,7 +16,9 @@ export const createCampaign = async(input: DeepPartial<Campaign>): Promise<any> 
 export const getCampaignList = async() => {
     let result: any[] = [];
 
-    result =  await campaignRepo.find();
+    result =  await campaignRepo.find({
+        relations: ['user']
+    });
 
     return result;
 }

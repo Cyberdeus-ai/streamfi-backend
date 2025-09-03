@@ -7,10 +7,10 @@ import { Post } from './post.entity';
 @Entity()
 export class Campaign extends Model
 {
-    @Column()
+    @Column({ type: 'timestamptz', precision: 3, default: () => `now()` })
     start_date: Date;
 
-    @Column()
+    @Column({ type: 'timestamptz', precision: 3, default: () => `now()` })
     end_date: Date;
 
     @Column('text', { array: true })

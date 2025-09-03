@@ -13,6 +13,16 @@ export const saveUser = async (input: DeepPartial<User>): Promise<any> => {
     return result;
 }
 
+export const findUserList = async () => {
+    let result: any = null;
+
+    result = await userRepo.find({
+        relations: ['xaccount']
+    });
+
+    return result;
+}
+
 export const findUserByCondition = async (condition: any): Promise<any> => {
     let result: any = null;
 
@@ -24,8 +34,9 @@ export const findUserByCondition = async (condition: any): Promise<any> => {
 export const findEngagerList = async (): Promise<any> => {
     let result: any = null;
 
-    result = await userRepo.findBy({
-        account_type: Not("Admin")
+    result = await userRepo.find({
+        where: { account_type: Not("Admin") },
+        relations: ["xaccount"]
     });
 
     return result;

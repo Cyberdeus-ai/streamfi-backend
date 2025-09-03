@@ -17,13 +17,13 @@ export class XAccount
     @Column({ type: 'int' })
     follower_count: number;
 
-    @Column()
+    @Column({ nullable: true})
     is_verified: boolean;
 
-    @Column()
+    @Column({ nullable: true })
     is_blue_verified: boolean;
 
-    @Column({ length: 255 })
+    @Column({ length: 255, nullable: true  })
     profile_pic_url: string;
 
     @Column({ type: 'int' })
@@ -33,7 +33,7 @@ export class XAccount
     bot: boolean
 
     @Column({ type: 'timestamptz', precision: 3, default: () => `now()` })
-    timestamp: Date;
+    created_at: Date;
 
     @OneToOne(() => User)
     @JoinColumn({ name: "user_id" })

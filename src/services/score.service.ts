@@ -6,7 +6,9 @@ const scoreRepo = AppDataSource.getRepository(Score);
 export const findScoreList = async () => {
     let result: any = null;
 
-    result = await scoreRepo.find();
+    result = await scoreRepo.find({
+        relations: ["user", "post"]
+    });
 
     return result;
 };
@@ -19,7 +21,7 @@ export const findScoreByCondition = async (condition: object) => {
     return result;
 }
 
-export const saveScore = async (userId: number, score: number, postId?: number) => {
+export const saveScore = async (userId: number, score: number, postId?: number): Promise<any> => {
     let result: any = null;
 
     const scoreData: any = {
@@ -36,7 +38,7 @@ export const saveScore = async (userId: number, score: number, postId?: number) 
     return result;
 }
 
-export const updateScore = async (userId: number, score: number, postId?: number) => {
+export const updateScore = async (userId: number, score: number, postId?: number): Promise<any> => {
     let result: any = null;
 
     const whereCondition: any = {

@@ -1,5 +1,5 @@
 import { DeepPartial } from "typeorm";
-
+import moment from "moment";
 import { AppDataSource } from "../utils/data-source";
 import { Post } from "../entities";
 
@@ -24,7 +24,9 @@ export const savePost = async (post: DeepPartial<Post>) => {
 export const findPostList = async () => {
 	let result: any = null;
 
-	result = await postRepo.find();
+	result = await postRepo.find({
+		relations: ['campaign', 'user', 'continuation']
+	});
 
 	return result;
 }
@@ -35,7 +37,8 @@ export const findTweetList = async ():Promise<any[]>=>{
     result = await postRepo.find({
 		where:{
 			type:'tweet'
-		}
+		},
+		relations: ['continuation', 'campaign', 'user']
 	});
 
 	return result;
@@ -51,10 +54,9 @@ export const updatePost = async (post: any) => {
 		{
 			tweet_id: post.tweet_id,
             type: post.type,
-            tweet_account: post.username,
             user: post.userId,
             campaign: post.campaignId,
-            timestamp: new Date(post.timestamp * 1000)
+            timestamp: moment(post.timestamp * 1000)
 		}
 	)
 
