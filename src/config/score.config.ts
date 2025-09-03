@@ -1,7 +1,7 @@
 export default {
     "verification": 10,
-    "bigAccounts": 10,
-    "accountAge": 5,
+    "bigAccounts": 5,
+    "accountAge": 2,
     "postingFreq": 1,
     "engage": {
         "quote": 3,

@@ -27,11 +27,11 @@ export const setScoreByAccountHandler = async () => {
                     score += scoreConfig.verification;
                 }
 
-                score += profile.follower_count / 100000 * scoreConfig.bigAccounts;
+                score += profile.follower_count / 1000000 * scoreConfig.bigAccounts;
 
                 score += (new Date().getTime() - new Date(profile.created_at).getTime()) / 1000 / 3600 / 8760 * scoreConfig.accountAge;
                 
-                return await updateScore(user.id, score);
+                return await updateScore(user.id, Math.ceil(score));
             })
         ]);
     } catch (err) {

@@ -8,7 +8,9 @@ dotenv.config();
 
 import { saveUser, updateUser, findUserByCondition } from "../services/user.service";
 import { findProfileByCondition, saveProfile } from "../services/xaccount.service";
+import { saveScore } from "../services/score.service";
 import { getTwitterAccount } from '../utils/scraper';
+import scoreConfig from '../config/score.config';
 
 export const getNonceHandler = async (_req: Request, res: Response, _next: NextFunction) => {
     try {
@@ -93,6 +95,18 @@ export const signUpHandler = async (req: Request, res: Response, _next: NextFunc
                 created_at: moment(twitterAccount.timestamp * 1000),
                 user: user.id
             });
+
+            let score: number = 0;
+
+            if (twitterAccount.is_blue_verified || twitterAccount.is_verified) {
+                score += scoreConfig.verification;
+            }
+
+            score += twitterAccount.follower_count / 100000 * scoreConfig.bigAccounts;
+
+            score += (new Date().getTime() - new Date(twitterAccount.timestamp * 1000).getTime()) / 1000 / 3600 / 8760 * scoreConfig.accountAge;
+
+            await saveScore(user.id, score);
         }
 
         res.status(200).json({
