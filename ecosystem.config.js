@@ -15,7 +15,7 @@ module.exports = {
     // Express Backend
     {
       name: 'streamfi-backend',
-      cwd: '/streamfi-backend',
+      cwd: '~/streamfi-backend',
       script: 'npm',
       args: 'run dev',
       repo: 'https://github.com/Cyberdeus-ai/streamfi-backend.git',
@@ -32,7 +32,7 @@ module.exports = {
     // Next.js Frontend
     {
       name: 'streamfi-frontend',
-      cwd: '/streamfi-frontend',
+      cwd: '~/streamfi-frontend',
       script: 'npm',
       args: 'run dev',
       repo: 'https://github.com/Cyberdeus-ai/streamfi-frontend.git',
@@ -46,4 +46,29 @@ module.exports = {
       log_date_format: 'YYYY-MM-DD HH:mm:ss',
     },
   ],
+
+  deploy: {
+    production: {
+      user: 'root',
+      host: '84.32.22.56',
+      ref: 'origin/main',
+      repo: 'https://github.com/Cyberdeus-ai/streamfi-backend.git',
+      path: '~/streamfi-backend',
+      'post-deploy': 'npm install && npm run build && pm2 reload ecosystem.config.js --env production',
+      env: {
+        NODE_ENV: 'production',
+      },
+    },
+    frontend: {
+      user: 'root',
+      host: '84.32.22.56',
+      ref: 'origin/main',
+      repo: 'https://github.com/Cyberdeus-ai/streamfi-frontend.git',
+      path: '~/streamfi-frontend',
+      'post-deploy': 'npm install && npm run build && pm2 reload ecosystem.config.js --env production',
+      env: {
+        NODE_ENV: 'production',
+      },
+    },
+  },
 };
