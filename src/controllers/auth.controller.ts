@@ -10,7 +10,7 @@ import { saveUser, updateUser, findUserByCondition } from "../services/user.serv
 import { findProfileByCondition, saveProfile } from "../services/xaccount.service";
 import { saveScore } from "../services/score.service";
 import { getTwitterAccount } from '../utils/scraper';
-import scoreConfig from '../config/score.config';
+import scoreConfig from '../utils/score-settings';
 
 export const getNonceHandler = async (_req: Request, res: Response, _next: NextFunction) => {
     try {
@@ -74,9 +74,6 @@ export const signUpHandler = async (req: Request, res: Response, _next: NextFunc
 
         const user = await saveUser({
             wallet_address: req.body.address,
-            campaigns: [],
-            posts: [],
-            scores: []
         });
 
         const twitterAccount = JSON.parse(await getTwitterAccount(req.body.twitterAccount));
@@ -93,7 +90,7 @@ export const signUpHandler = async (req: Request, res: Response, _next: NextFunc
                 number_of_tweets: twitterAccount.number_of_tweets,
                 bot: twitterAccount.bot,
                 created_at: moment(twitterAccount.timestamp * 1000),
-                user: user.id
+                user: { id: user.id }
             });
 
             let score: number = 0;
@@ -151,7 +148,7 @@ export const signInHandler = async (req: Request, res: Response, _next: NextFunc
         const token = jwt.sign(payload, secretKey!, options);
 
         const profile = await findProfileByCondition({
-            user: user.id
+            user: { id: user.id }
         });
 
         res.status(200).json({

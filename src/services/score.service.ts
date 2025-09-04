@@ -13,15 +13,31 @@ export const findScoreList = async () => {
     return result;
 };
 
-export const findScoreByCondition = async (condition: object) => {
+export const findLatestScoreList = async () => {
     let result: any = null;
 
-    result = await scoreRepo.findOneBy(condition);
+    result = await scoreRepo.find({
+        where: {
+            is_latest: true
+        },
+        relations: ["user"]    
+    });
 
     return result;
 }
 
-export const saveScore = async (userId: number, score: number, postId?: number): Promise<any> => {
+export const findScoreListByCondition = async (condition: any) => {
+    let result: any = null;
+
+    result = await scoreRepo.find({
+        where: condition,
+        relations: ['user', 'post']
+    });
+
+    return result;
+}
+
+export const saveScore = async (userId: number, score: number): Promise<any> => {
     let result: any = null;
 
     const scoreData: any = {
@@ -29,29 +45,25 @@ export const saveScore = async (userId: number, score: number, postId?: number):
         score: score,
     };
 
-    if (postId !== undefined) {
-        scoreData.post = { id: postId };
-    }
-
     result = await scoreRepo.save(scoreData);
 
     return result;
 }
 
-export const updateScore = async (userId: number, score: number, postId?: number): Promise<any> => {
+export const insertScoreList = async (input: any) => {
     let result: any = null;
 
-    const whereCondition: any = {
-        user: { id: userId }
-    };
+    result = await scoreRepo.insert(input);
 
-    if (postId !== undefined) {
-        whereCondition.post = { id: postId };
-    }
+    return result;
+}
+
+export const updateIsLatest = async () => {
+    let result: any = null;
 
     result = await scoreRepo.update(
-        whereCondition,
-        { score: score }
+        {is_latest: true},
+        {is_latest: false}
     );
 
     return result;

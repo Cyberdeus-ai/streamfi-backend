@@ -9,8 +9,6 @@ import {
 
 import { getEngagerListHandler } from '../controllers/user.controller';
 
-import { setScoreByAccountHandler, setScoreByPostHandler } from "../controllers/score.controller";
-
 const getQuotesRepliesAndRTs = async () => {
   try {
     // const tweetList = await getTweetListHandler();
@@ -20,8 +18,6 @@ const getQuotesRepliesAndRTs = async () => {
     //   await fillReplyListHandler(tweetList, engagerList);
     //   await fillRetweetListHandler(tweetList, engagerList);
     // }
-    await setScoreByAccountHandler();
-    // await setScoreByPostHandler();
     return console.log("Cron Job is running!");
   } catch (err) {
     return console.error(err);

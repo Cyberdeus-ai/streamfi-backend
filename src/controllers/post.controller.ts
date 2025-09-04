@@ -1,6 +1,6 @@
 import { Request, Response, NextFunction } from 'express';
 import moment from 'moment';
-import { findPostList, findTweetList, savePost, insertPostList, updatePost } from '../services/post.service';
+import { findPostList, findTweetList, savePost, insertPostList } from '../services/post.service';
 import {
     getQuotesByTweetId,
     getQuotesContinuationByTweetId,
@@ -12,6 +12,8 @@ import {
     getTweetsContinuationByUser
 } from '../utils/scraper';
 import { insertContinuationList, updateContinuation } from '../services/continuation.service';
+import { insertScoreList, findLatestScoreList, updateIsLatest } from '../services/score.service';
+import scoreConfig from '../utils/score-settings';
 
 export const getTweetListHandler = async () => {
     try {
@@ -36,7 +38,7 @@ export const fillTweetListHandler = async (hashtags: string[], tickers: string[]
                 while (1) {
                     res = await getTweetsContinuationByUser(handle, continuation_token);
                     continuation_token = res.continuation_token;
-                    if (res.results ===undefined || res.results?.length < 1) break;
+                    if (res.results === undefined || res.results?.length < 1) break;
                     res.results.forEach((item: any) => {
                         tweetList.push(item);
                     });
@@ -65,7 +67,7 @@ export const fillTweetListHandler = async (hashtags: string[], tickers: string[]
         if (postList && postList.length > 0) {
             await insertPostList(postList);
             await insertContinuationList(postList.map((post: any) => {
-                return { post: post.id };
+                return { post: { id: post.id } };
             }))
         }
     } catch (err) {
@@ -105,16 +107,28 @@ export const fillQuoteListHandler = async (tweetList: any[], engagerList: any[])
                         tweet_id: tweetList[index].tweet_id,
                         type: 'quote',
                         timestamp: filtered.timestamp,
-                        user: engagerList.find((engager) => {
-                            return engager.xaccount.username === filtered.user.username
-                        }).id,
-                        campaign: tweetList[index].campaign.id
+                        user: {
+                            id: engagerList.find((engager) => {
+                                return engager.xaccount.username === filtered.user.username
+                            }).id
+                        },
+                        campaign: { id: tweetList[index].campaign.id }
                     }
                 });
             }));
 
         const postList = postListArrays.flat();
-        if (postList && postList.length > 0) await insertPostList(postList);
+        if (postList && postList.length > 0) {
+            await insertPostList(postList);
+            const latestScoreList = await findLatestScoreList();
+            await updateIsLatest();
+            await insertScoreList(postList.map((post: any) => {
+                return {
+                    user: { id: post.user.id },
+                    score: Number(latestScoreList.find((score: any) => score.user.id === post.user.id)?.score) + Number(scoreConfig.engage.quote),
+                }
+            }));
+        }
     } catch (err) {
         console.error(err);
         return;
@@ -162,7 +176,17 @@ export const fillReplyListHandler = async (tweetList: any[], engagerList: any[])
             }));
 
         const postList = postListArrays.flat();
-        if (postList && postList.length > 0) await insertPostList(postList);
+        if (postList && postList.length > 0) {
+            await insertPostList(postList);
+            const latestScoreList = await findLatestScoreList();
+            await updateIsLatest();
+            await insertScoreList(postList.map((post: any) => {
+                return {
+                    user: { id: post.user.id },
+                    score: Number(latestScoreList.find((score: any) => score.user.id === post.user.id)?.score) + Number(scoreConfig.engage.reply),
+                }
+            }));
+        }
     } catch (err) {
         console.error(err);
         return;
@@ -210,42 +234,19 @@ export const fillRetweetListHandler = async (tweetList: any[], engagerList: any[
             }));
 
         const postList = postListArrays.flat();
-        if (postList && postList.length > 0) await insertPostList(postList);
+        if (postList && postList.length > 0) {
+            await insertPostList(postList);
+            const latestScoreList = await findLatestScoreList();
+            await updateIsLatest();
+            await insertScoreList(postList.map((post: any) => {
+                return {
+                    user: { id: post.user.id },
+                    score: Number(latestScoreList.find((score: any) => score.user.id === post.user.id)?.score) + Number(scoreConfig.engage.retweet),
+                }
+            }));
+        }
     } catch (err) {
         console.error(err);
         return;
-    }
-}
-
-export const createPostHandler = async (req: Request, res: Response, _next: NextFunction) => {
-    try {
-        const newPost = await savePost({
-            tweet_id: req.body.tweet_id,
-            type: req.body.type,
-            user: req.body.userId,
-            campaign: req.body.campaignId,
-        });
-
-        res.status(200).json({
-            result: true,
-            newPost
-        });
-    } catch (err) {
-        console.error(err);
-        res.status(500).send(err);
-    }
-}
-
-export const getPostListHandler = async (req: Request, res: Response, _next: NextFunction) => {
-    try {
-        const postList = await findPostList();
-
-        res.status(200).json({
-            result: true,
-            postList
-        });
-    } catch (err) {
-        console.error(err);
-        res.status(500).send(err);
     }
 }

@@ -22,3 +22,16 @@ export const getCampaignList = async() => {
 
     return result;
 }
+
+export const findCampaignDetail = async(id: number): Promise<any> => {
+    let result: any = null;
+
+    result = await campaignRepo.find({ 
+        where: {
+            id: id
+        },
+        relations: ['user', 'posts']
+     });
+
+    return result;
+ }
