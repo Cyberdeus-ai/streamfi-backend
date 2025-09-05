@@ -35,3 +35,17 @@ export const findCampaignDetail = async(id: number): Promise<any> => {
 
     return result;
  }
+
+ export const findCampaignCountByUser = async(userId: number) => {
+    let result: any = null;
+    
+    result = await campaignRepo.count({
+        where: {
+            user: {
+                id: userId
+            }   
+        }
+    });
+
+    return result;
+ }

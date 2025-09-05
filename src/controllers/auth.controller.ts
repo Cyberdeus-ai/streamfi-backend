@@ -9,6 +9,7 @@ dotenv.config();
 import { saveUser, updateUser, findUserByCondition } from "../services/user.service";
 import { findProfileByCondition, saveProfile } from "../services/xaccount.service";
 import { saveScore, findLatestScoreList, updateIsLatest, insertScoreList } from "../services/score.service";
+import { findCampaignCountByUser } from '../services/campaign.service';
 import { getTwitterAccount } from '../utils/scraper';
 import scoreConfig from '../utils/score-settings';
 
@@ -162,10 +163,12 @@ export const signInHandler = async (req: Request, res: Response, _next: NextFunc
             user: { id: user.id }
         });
 
+        const campaignCount = await findCampaignCountByUser(user.id);
+
         res.status(200).json({
             result: true,
             token: token,
-            user: profile
+            user: { ...profile, campaignCount: campaignCount }
         });
     } catch (err) {
         console.error(err);
@@ -196,10 +199,12 @@ export const signInWithTokenHandler = async (req: Request, res: Response, _next:
             user: user.id
         });
 
+        const campaignCount = await findCampaignCountByUser(user.id);
+
         res.status(200).json({
             result: true,
             token: newToken,
-            user: profile
+            user: { ...profile, campaignCount: campaignCount }
         });
     } catch (err) {
         console.error(err);
