@@ -6,11 +6,13 @@ import {
   fillReplyListHandler,
   fillRetweetListHandler
 } from "../controllers/post.controller";
+import { setScoreByAccountHandler } from "../controllers/score.controller";
 
 import { getEngagerListHandler } from '../controllers/user.controller';
 
 const getQuotesRepliesAndRTs = async () => {
   try {
+    // await setScoreByAccountHandler();
     // const tweetList = await getTweetListHandler();
     // const engagerList = await getEngagerListHandler();
     // if (tweetList && tweetList.length > 0) {

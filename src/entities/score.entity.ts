@@ -7,8 +7,14 @@ import { User } from './user.entity';
 export class Score extends Model
 {
     @Column({ type: 'double precision' })
-    score: number;
+    value: number;
 
+    @Column({ type: 'double precision', default: 0.0 })
+    percentage: number;
+
+    @Column({ default: false })
+    is_first: boolean;
+    
     @Column({ default: true })
     is_latest: boolean;
 

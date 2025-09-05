@@ -1,6 +1,5 @@
-import { Request, Response, NextFunction } from 'express';
 import moment from 'moment';
-import { findPostList, findTweetList, savePost, insertPostList } from '../services/post.service';
+import { findTweetList, insertPostList, findCampaignByPost } from '../services/post.service';
 import {
     getQuotesByTweetId,
     getQuotesContinuationByTweetId,
@@ -121,11 +120,16 @@ export const fillQuoteListHandler = async (tweetList: any[], engagerList: any[])
         if (postList && postList.length > 0) {
             await insertPostList(postList);
             const latestScoreList = await findLatestScoreList();
+            const latestTotal = latestScoreList.reduce((total: number, score: any) => Number(total) + Number(score.value), 0);
+            const total = postList.length * scoreConfig.engage.quote + latestTotal;
             await updateIsLatest();
-            await insertScoreList(postList.map((post: any) => {
+            await insertScoreList(latestScoreList.map(async (score: any) => {
+                const newValue = postList.findIndex((post: any) => score.user.id === post.user.id) > -1 ? scoreConfig.engage.quote : 0;
+                const value = Math.ceil(Number(score.value) + Number(newValue));
                 return {
-                    user: { id: post.user.id },
-                    score: Number(latestScoreList.find((score: any) => score.user.id === post.user.id)?.score) + Number(scoreConfig.engage.quote),
+                    user: { id: score.user.id },
+                    value: value,
+                    percentage: Math.ceil(value / total * 10000)
                 }
             }));
         }
@@ -179,11 +183,16 @@ export const fillReplyListHandler = async (tweetList: any[], engagerList: any[])
         if (postList && postList.length > 0) {
             await insertPostList(postList);
             const latestScoreList = await findLatestScoreList();
+            const latestTotal = latestScoreList.reduce((total: number, score: any) => Number(total) + Number(score.value), 0);
+            const total = postList.length * scoreConfig.engage.reply + latestTotal;
             await updateIsLatest();
-            await insertScoreList(postList.map((post: any) => {
+            await insertScoreList(latestScoreList.map(async (score: any) => {
+                const newValue = postList.findIndex((post: any) => score.user.id === post.user.id) > -1 ? scoreConfig.engage.reply : 0;
+                const value = Math.ceil(Number(score.value) + Number(newValue));
                 return {
-                    user: { id: post.user.id },
-                    score: Number(latestScoreList.find((score: any) => score.user.id === post.user.id)?.score) + Number(scoreConfig.engage.reply),
+                    user: { id: score.user.id },
+                    value: value,
+                    percentage: Math.ceil(value / total * 10000)
                 }
             }));
         }
@@ -237,11 +246,16 @@ export const fillRetweetListHandler = async (tweetList: any[], engagerList: any[
         if (postList && postList.length > 0) {
             await insertPostList(postList);
             const latestScoreList = await findLatestScoreList();
+            const latestTotal = latestScoreList.reduce((total: number, score: any) => Number(total) + Number(score.value), 0);
+            const total = postList.length * scoreConfig.engage.retweet + latestTotal;
             await updateIsLatest();
-            await insertScoreList(postList.map((post: any) => {
+            await insertScoreList(latestScoreList.map(async (score: any) => {
+                const newValue = postList.findIndex((post: any) => score.user.id === post.user.id) > -1 ? scoreConfig.engage.retweet : 0;
+                const value = Math.ceil(Number(score.value) + Number(newValue));
                 return {
-                    user: { id: post.user.id },
-                    score: Number(latestScoreList.find((score: any) => score.user.id === post.user.id)?.score) + Number(scoreConfig.engage.retweet),
+                    user: { id: score.user.id },
+                    value: value,
+                    percentage: Math.ceil(value / total * 10000)
                 }
             }));
         }

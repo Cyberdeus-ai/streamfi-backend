@@ -1,5 +1,4 @@
-import { DeepPartial, Not } from 'typeorm';
-
+import { DeepPartial, Not, In } from 'typeorm';
 import { AppDataSource } from '../utils/data-source';
 import { User } from '../entities';
 
@@ -40,6 +39,20 @@ export const findEngagerList = async (): Promise<any> => {
     });
 
     return result;
+}
+
+export const findEngagerListByCampaign = async (condition: any[]) => {
+    let result: any = null;
+
+    result = await userRepo.find({
+        where: { 
+            account_type: Not("Admin"),
+            id: In(condition) 
+        },
+        relations: ["xaccount"]
+    });
+
+    return result;    
 }
 
 export const updateUser = async (userId: number, accountType: string): Promise<any> => {

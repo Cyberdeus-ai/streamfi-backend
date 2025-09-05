@@ -1,9 +1,15 @@
 import { Request, Response } from "express";
-import { findScoreList, findScoreListByCondition, insertScoreList } from '../services/score.service';
-import { findEngagerList, findUserByCondition, findUserList } from "../services/user.service";
+import {
+    findScoreList,
+    findScoreListByCondition,
+    findScoreUserList,
+    findGainScoreList,
+    findFirstScoreList,
+    insertScoreList
+} from '../services/score.service';
+import { findEngagerList } from "../services/user.service";
+import { findPostUserListByCampaign } from "../services/post.service";
 import scoreConfig from "../utils/score-settings";
-import { findPostListByCampaign } from "../services/post.service";
-import { Between } from "typeorm";
 
 export const getScoreListHandler = async () => {
     try {
@@ -17,58 +23,77 @@ export const getScoreListHandler = async () => {
 
 export const getScoreListByCampaignHandler = async (req: Request, res: Response) => {
     try {
-        const postList = await findPostListByCampaign(req.body.campaignId);
+        const postUserList = await findPostUserListByCampaign(req.body.campaignId);
         let fromDate = new Date();
         switch (req.body.period) {
             case 0:
-                fromDate.setHours(fromDate.getHours() - 24);
-                break;
-            case 1:
-                fromDate.setHours(fromDate.getHours() - 48);
-                break;
-            case 2:
                 fromDate.setDate(fromDate.getDate() - 7);
                 break;
-            case 3:
+            case 1:
                 fromDate.setDate(fromDate.getDate() - 30);
                 break;
-            case 4:
+            case 2:
                 fromDate.setMonth(fromDate.getMonth() - 3);
                 break;
-            case 5:
+            case 3:
                 fromDate.setMonth(fromDate.getMonth() - 6);
                 break;
-            case 6:
+            case 4:
                 fromDate.setFullYear(fromDate.getFullYear() - 1);
                 break;
             default:
                 break;
         }
-        const scoreData = await findScoreListByCondition({
-            post: {
-                id: [
-                    ...postList.map((post: any) => {
-                        return post.id;
-                    }),
-                    null
-                ]
-            },
-            created_at: Between(fromDate, new Date()),
-        });
-        const userList = await findUserList();
-        const scoreList = userList.map((score: any) => {
-            return {
-                ...score,
-                user: {
-                    ...score.user,
-                    username: userList.find((user: any) => user.id === score.user.id).xaccount.username
-                }
+        const scoreList = await findScoreListByCondition(postUserList, fromDate);
+        const userList = await findScoreUserList(postUserList);
+        const top20UserList = userList.slice(0, 20);
+        const top20ScoreList = top20UserList.map((user: any) => {
+            let userScoreList = scoreList.filter((score: any) => score.user_id === user.id);
+            if (userScoreList) {
+                userScoreList.sort((a: any, b: any) => new Date(b.score_created_at).getTime() - new Date(a.score_created_at).getTime())
             }
-        })
+            return {
+                ...user,
+                score: userScoreList
+            }
+        });
 
         res.status(200).json({
             result: true,
-            scoreList
+            top20ScoreList,
+        });
+    } catch (err) {
+        console.error(err);
+        return res.status(500).send(err);
+    }
+}
+
+export const getGainScoreListByCampaignHandler = async (req: Request, res: Response) => {
+    try {
+        const postUserList = await findPostUserListByCampaign(req.body.campaignId);
+        const userList = await findGainScoreList(postUserList);
+        const firstScoreList = await findFirstScoreList();
+
+        let gainUserList = userList.map((user: any) => {
+            const userFirstScore = firstScoreList.find((score: any) => score.user.id === user.user_id);
+            return {
+                ...user,
+                gain: Number(user.current) - Number(userFirstScore.percentage),
+            }
+        });
+
+        gainUserList.sort((a: any, b: any) => b.gain - a.gain);
+
+        const len = gainUserList.length;
+        
+        let gainerList = gainUserList.slice(0, 10);
+        let loserList = gainUserList.slice(len-10);
+
+        res.status(200).json({
+            result: true,
+            gainerList,
+            loserList,
+            userList
         });
     } catch (err) {
         console.error(err);
@@ -80,7 +105,7 @@ export const setScoreByAccountHandler = async () => {
     try {
         const engagerList = await findEngagerList();
 
-        const filtered = engagerList.map((user: any) => {
+        let scoreList = engagerList.map((user: any) => {
             let score: number = 0;
             let profile = user.xaccount;
 
@@ -94,11 +119,19 @@ export const setScoreByAccountHandler = async () => {
 
             return {
                 user: { id: user.id },
-                score: Math.ceil(score),
+                value: Math.ceil(score),
             }
         });
 
-        await insertScoreList(filtered);
+        const total = scoreList.reduce((total: number, score: any) => total + score.value, 0);
+        scoreList = scoreList.map((score: any) => {
+            return {
+                ...score,
+                percentage: Math.ceil(score.value / total * 10000)
+            }
+        })
+
+        await insertScoreList(scoreList);
     } catch (err) {
         console.error(err);
         return null;

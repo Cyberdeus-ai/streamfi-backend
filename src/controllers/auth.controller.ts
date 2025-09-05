@@ -8,7 +8,7 @@ dotenv.config();
 
 import { saveUser, updateUser, findUserByCondition } from "../services/user.service";
 import { findProfileByCondition, saveProfile } from "../services/xaccount.service";
-import { saveScore } from "../services/score.service";
+import { saveScore, findLatestScoreList, updateIsLatest, insertScoreList } from "../services/score.service";
 import { getTwitterAccount } from '../utils/scraper';
 import scoreConfig from '../utils/score-settings';
 
@@ -103,7 +103,18 @@ export const signUpHandler = async (req: Request, res: Response, _next: NextFunc
 
             score += (new Date().getTime() - new Date(twitterAccount.timestamp * 1000).getTime()) / 1000 / 3600 / 8760 * scoreConfig.accountAge;
 
-            await saveScore(user.id, score);
+            await saveScore(user.id, score, true);
+
+            const latestScoreList = await findLatestScoreList();
+            const total = latestScoreList.reduce((total: number, score: any) => Number(total) + Number(score.value), 0);
+            await updateIsLatest();
+            await insertScoreList(latestScoreList.map(async (score: any) => {
+                return {
+                    user: { id: score.user.id },
+                    value: score.value,
+                    percentage: Math.ceil(score.value / total * 10000)
+                }
+            }));
         }
 
         res.status(200).json({

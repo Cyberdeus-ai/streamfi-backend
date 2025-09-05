@@ -31,21 +31,31 @@ export const findPostList = async () => {
 	return result;
 }
 
-export const findPostListByCampaign = async (campaignId: number) => {
+export const findCampaignByPost = async (postId: number) => {
 	let result: any = null;
-
+	
 	result = await postRepo.find({
 		where: {
-			campaign: {
-				id: campaignId
-			},
-			type: Not("tweet")
+			id: postId
 		},
-		relations: ['campaign', 'user'],
-		order: {
-			id: 'DESC'
-		}
+		relations: ['campaign']
 	});
+
+	return result;
+}
+
+export const findPostUserListByCampaign = async (campaignId: number) => {
+	let result: any = null;
+
+	result = await postRepo
+		.createQueryBuilder('post')
+		.innerJoin('post.user', 'user')
+		.innerJoin('post.campaign', 'campaign')
+		.where('campaign.id = :campaignId', { campaignId })
+		.andWhere('post.type != :type', { type: 'tweet' })
+		.groupBy('user.id')
+		.select('user.id', 'id')
+		.getRawMany();
 
 	return result;
 }
