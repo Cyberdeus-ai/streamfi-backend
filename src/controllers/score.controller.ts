@@ -48,9 +48,9 @@ export const getScoreListByCampaignHandler = async (req: Request, res: Response)
         const userList = await findScoreUserList(postUserList);
         const top20UserList = userList.slice(0, 20);
         const top20ScoreList = top20UserList.map((user: any) => {
-            let userScoreList = scoreList.filter((score: any) => score.user_id === user.id);
+            let userScoreList = scoreList.filter((score: any) => score.user_id === user.user_id);
             if (userScoreList) {
-                userScoreList.sort((a: any, b: any) => new Date(b.score_created_at).getTime() - new Date(a.score_created_at).getTime())
+                userScoreList.sort((a: any, b: any) => new Date(a.score_created_at).getTime() - new Date(b.score_created_at).getTime())
             }
             return {
                 ...user,
@@ -127,7 +127,7 @@ export const setScoreByAccountHandler = async () => {
         scoreList = scoreList.map((score: any) => {
             return {
                 ...score,
-                percentage: Math.ceil(score.value / total * 10000)
+                percentage: Math.round(score.value / total * 10000)
             }
         })
 

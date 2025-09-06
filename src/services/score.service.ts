@@ -139,8 +139,6 @@ export const findGainScoreList = async (userList: any[]) => {
 
     result = await query.getRawMany();
 
-    console.log(result);
-
     return result;
 }
 

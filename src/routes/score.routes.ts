@@ -5,7 +5,7 @@ import { getGainScoreListByCampaignHandler, getScoreListByCampaignHandler } from
 
 const router = Router();
 
-router.post("/list", getScoreListByCampaignHandler);
-router.post("/toplist", getGainScoreListByCampaignHandler);
+router.post("/toplist", getScoreListByCampaignHandler);
+router.post("/list", getGainScoreListByCampaignHandler);
 
 export default router;

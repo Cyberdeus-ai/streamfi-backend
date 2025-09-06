@@ -125,11 +125,11 @@ export const fillQuoteListHandler = async (tweetList: any[], engagerList: any[])
             await updateIsLatest();
             await insertScoreList(latestScoreList.map(async (score: any) => {
                 const newValue = postList.findIndex((post: any) => score.user.id === post.user.id) > -1 ? scoreConfig.engage.quote : 0;
-                const value = Math.ceil(Number(score.value) + Number(newValue));
+                const value = Number(score.value) + Number(newValue);
                 return {
                     user: { id: score.user.id },
                     value: value,
-                    percentage: Math.ceil(value / total * 10000)
+                    percentage: Math.round(value / total * 10000)
                 }
             }));
         }
@@ -188,11 +188,11 @@ export const fillReplyListHandler = async (tweetList: any[], engagerList: any[])
             await updateIsLatest();
             await insertScoreList(latestScoreList.map(async (score: any) => {
                 const newValue = postList.findIndex((post: any) => score.user.id === post.user.id) > -1 ? scoreConfig.engage.reply : 0;
-                const value = Math.ceil(Number(score.value) + Number(newValue));
+                const value = Number(score.value) + Number(newValue);
                 return {
                     user: { id: score.user.id },
                     value: value,
-                    percentage: Math.ceil(value / total * 10000)
+                    percentage: Math.round(value / total * 10000)
                 }
             }));
         }
@@ -251,11 +251,11 @@ export const fillRetweetListHandler = async (tweetList: any[], engagerList: any[
             await updateIsLatest();
             await insertScoreList(latestScoreList.map(async (score: any) => {
                 const newValue = postList.findIndex((post: any) => score.user.id === post.user.id) > -1 ? scoreConfig.engage.retweet : 0;
-                const value = Math.ceil(Number(score.value) + Number(newValue));
+                const value = Number(score.value) + Number(newValue);
                 return {
                     user: { id: score.user.id },
                     value: value,
-                    percentage: Math.ceil(value / total * 10000)
+                    percentage: Math.round(value / total * 10000)
                 }
             }));
         }

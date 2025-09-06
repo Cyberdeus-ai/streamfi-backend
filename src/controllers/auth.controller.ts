@@ -113,7 +113,7 @@ export const signUpHandler = async (req: Request, res: Response, _next: NextFunc
                 return {
                     user: { id: score.user.id },
                     value: score.value,
-                    percentage: Math.ceil(score.value / total * 10000)
+                    percentage: Math.round(score.value / total * 10000)
                 }
             }));
         }
