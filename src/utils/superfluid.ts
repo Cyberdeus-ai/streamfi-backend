@@ -5,8 +5,8 @@ const dotenv = require('dotenv');
 
 dotenv.config();
 
-const OP_SEPOLIA_CHAIN_ID = 11155420;
-const OP_SEPOLIA_RPC_URL = "https://sepolia.infura.io/v3/2c6837284b0c42c2b2c4fb407d785e77";
+const OP_SEPOLIA_CHAIN_ID = 11155111;
+const OP_SEPOLIA_RPC_URL = "https://sepolia.infura.io/v3/11573613c5c84957abc1068b3fccfa3d";
 
 const FLOW_SPLITTER_ABI = [
     "function createSplit(address superToken, address[] memory recipients, uint256[] memory percentages) external",

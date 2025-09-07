@@ -16,7 +16,7 @@ export async function tokenValidation(req: Request, res: Response, next: NextFun
         }
 
         const token = req.headers.authorization?.split(" ")[1];
-        const decoded = jwt.verify(token, process.env.JWT_SECRET_KEY!);
+        const decoded = jwt.verify(token, process.env.JWT_SECRET_KEY);
 
         const currentTime = Date.now() / 1000;
 
@@ -35,6 +35,6 @@ export async function tokenValidation(req: Request, res: Response, next: NextFun
         }
     } catch (err) {
         console.error(err);
-        res.status(500).send(err);
+        res.status(401).send(err);
     }
 }

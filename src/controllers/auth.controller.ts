@@ -157,7 +157,7 @@ export const signInHandler = async (req: Request, res: Response, _next: NextFunc
         const options = {
             expiresIn: "2h"
         };
-        const token = jwt.sign(payload, secretKey!, options);
+        const token = jwt.sign(payload, secretKey, options);
 
         const profile = await findProfileByCondition({
             user: { id: user.id }
@@ -193,7 +193,7 @@ export const signInWithTokenHandler = async (req: Request, res: Response, _next:
         const options = {
             expiresIn: "2h"
         };
-        const newToken = jwt.sign(payload, secretKey!, options);
+        const newToken = jwt.sign(payload, secretKey, options);
 
         const profile = await findProfileByCondition({
             user: user.id
@@ -208,6 +208,6 @@ export const signInWithTokenHandler = async (req: Request, res: Response, _next:
         });
     } catch (err) {
         console.error(err);
-        res.status(500).send(err);
+        res.status(401).send(err);
     }
 }
