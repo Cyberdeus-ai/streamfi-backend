@@ -26,6 +26,6 @@ const getQuotesRepliesAndRTs = async () => {
   }
 }
 
-export const cron = new CronJob('* * * * *', () => {
+export const cron = new CronJob('0 * * * *', () => {
   getQuotesRepliesAndRTs();
 });
