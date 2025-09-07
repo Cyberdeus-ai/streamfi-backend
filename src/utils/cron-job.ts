@@ -12,14 +12,13 @@ import { getEngagerListHandler } from '../controllers/user.controller';
 
 const getQuotesRepliesAndRTs = async () => {
   try {
-    // await setScoreByAccountHandler();
-    // const tweetList = await getTweetListHandler();
-    // const engagerList = await getEngagerListHandler();
-    // if (tweetList && tweetList.length > 0) {
-    //   await fillQuoteListHandler(tweetList, engagerList);
-    //   await fillReplyListHandler(tweetList, engagerList);
-    //   await fillRetweetListHandler(tweetList, engagerList);
-    // }
+    const tweetList = await getTweetListHandler();
+    const engagerList = await getEngagerListHandler();
+    if (tweetList && tweetList.length > 0) {
+      await fillQuoteListHandler(tweetList, engagerList);
+      await fillReplyListHandler(tweetList, engagerList);
+      await fillRetweetListHandler(tweetList, engagerList);
+    }
     return console.log("Cron Job is running!");
   } catch (err) {
     return console.error(err);
