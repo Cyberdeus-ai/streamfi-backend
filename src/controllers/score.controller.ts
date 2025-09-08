@@ -24,39 +24,42 @@ export const getScoreListHandler = async () => {
 export const getScoreListByCampaignHandler = async (req: Request, res: Response) => {
     try {
         const postUserList = await findPostUserListByCampaign(req.body.campaignId);
-        let fromDate = new Date();
-        switch (req.body.period) {
-            case 0:
-                fromDate.setDate(fromDate.getDate() - 7);
-                break;
-            case 1:
-                fromDate.setDate(fromDate.getDate() - 30);
-                break;
-            case 2:
-                fromDate.setMonth(fromDate.getMonth() - 3);
-                break;
-            case 3:
-                fromDate.setMonth(fromDate.getMonth() - 6);
-                break;
-            case 4:
-                fromDate.setFullYear(fromDate.getFullYear() - 1);
-                break;
-            default:
-                break;
+        let top20ScoreList = [];
+        if (postUserList && postUserList.length > 0) {
+            let fromDate = new Date();
+            switch (req.body.period) {
+                case 0:
+                    fromDate.setDate(fromDate.getDate() - 7);
+                    break;
+                case 1:
+                    fromDate.setDate(fromDate.getDate() - 30);
+                    break;
+                case 2:
+                    fromDate.setMonth(fromDate.getMonth() - 3);
+                    break;
+                case 3:
+                    fromDate.setMonth(fromDate.getMonth() - 6);
+                    break;
+                case 4:
+                    fromDate.setFullYear(fromDate.getFullYear() - 1);
+                    break;
+                default:
+                    break;
+            }
+            const scoreList = await findScoreListByCondition(postUserList, fromDate);
+            const userList = await findScoreUserList(postUserList);
+            const top20UserList = userList.slice(0, 20);
+            top20ScoreList = top20UserList.map((user: any) => {
+                let userScoreList = scoreList.filter((score: any) => score.user_id === user.user_id);
+                if (userScoreList) {
+                    userScoreList.sort((a: any, b: any) => new Date(a.score_created_at).getTime() - new Date(b.score_created_at).getTime())
+                }
+                return {
+                    ...user,
+                    score: userScoreList
+                }
+            });
         }
-        const scoreList = await findScoreListByCondition(postUserList, fromDate);
-        const userList = await findScoreUserList(postUserList);
-        const top20UserList = userList.slice(0, 20);
-        const top20ScoreList = top20UserList.map((user: any) => {
-            let userScoreList = scoreList.filter((score: any) => score.user_id === user.user_id);
-            if (userScoreList) {
-                userScoreList.sort((a: any, b: any) => new Date(a.score_created_at).getTime() - new Date(b.score_created_at).getTime())
-            }
-            return {
-                ...user,
-                score: userScoreList
-            }
-        });
 
         res.status(200).json({
             result: true,
@@ -71,23 +74,30 @@ export const getScoreListByCampaignHandler = async (req: Request, res: Response)
 export const getGainScoreListByCampaignHandler = async (req: Request, res: Response) => {
     try {
         const postUserList = await findPostUserListByCampaign(req.body.campaignId);
-        const userList = await findGainScoreList(postUserList);
-        const firstScoreList = await findFirstScoreList();
 
-        let gainUserList = userList.map((user: any) => {
-            const userFirstScore = firstScoreList.find((score: any) => score.user.id === user.user_id);
-            return {
-                ...user,
-                gain: Number(user.current) - Number(userFirstScore.percentage),
-            }
-        });
+        let userList = [];
+        let gainerList = [];
+        let loserList = [];
 
-        gainUserList.sort((a: any, b: any) => b.gain - a.gain);
+        if (postUserList && postUserList.length > 0) {
+            userList = await findGainScoreList(postUserList);
+            const firstScoreList = await findFirstScoreList();
 
-        const len = gainUserList.length;
-        
-        let gainerList = gainUserList.slice(0, 10);
-        let loserList = gainUserList.slice(len-10);
+            const gainUserList = userList.map((user: any) => {
+                const userFirstScore = firstScoreList.find((score: any) => score.user.id === user.user_id);
+                return {
+                    ...user,
+                    gain: Number(user.current) - Number(userFirstScore.percentage),
+                }
+            });
+
+            gainUserList.sort((a: any, b: any) => b.gain - a.gain);
+
+            const len = gainUserList.length;
+
+            gainerList = gainUserList.slice(0, 10);
+            loserList = gainUserList.slice(len - 10);
+        }
 
         res.status(200).json({
             result: true,
