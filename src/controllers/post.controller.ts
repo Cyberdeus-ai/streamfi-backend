@@ -81,22 +81,22 @@ export const fillQuoteListHandler = async (tweetList: any[], engagerList: any[])
                 let list: any[] = [];
                 let res;
                 let continuation_token;
-                if (post.continuation.quote_id === null) {
-                    res = await getQuotesByTweetId(post.tweet_id);
+                if (post.quote_id === null) {
+                    res = await getQuotesByTweetId(post.post.tweet_id);
                     res.results?.forEach((item: any) => {
                         list.push(item);
                     });
                     continuation_token = res.continuation_token;
-                } else continuation_token = post.continuation.quote_id;
+                } else continuation_token = post.quote_id;
                 while (1) {
-                    res = await getQuotesContinuationByTweetId(post.tweet_id, continuation_token);
+                    res = await getQuotesContinuationByTweetId(post.post.tweet_id, continuation_token);
                     continuation_token = res.continuation_token;
                     if (res.results === undefined || res.results?.length < 1) break;
                     res.results?.forEach((item: any) => {
                         list.push(item);
                     });
                 }
-                await updateContinuation(post.id, { quote_id: continuation_token });
+                await updateContinuation(post.post.id, { quote_id: continuation_token });
                 return list.filter((item: any) => {
                     return engagerList.findIndex((engager) => {
                         return engager.xaccount.username === item.user.username
@@ -146,22 +146,22 @@ export const fillReplyListHandler = async (tweetList: any[], engagerList: any[])
                 let list: any[] = [];
                 let res;
                 let continuation_token;
-                if (post.continuation.quote_id === null) {
-                    res = await getRepliesByTweetId(post.tweet_id);
+                if (post.reply_id === null) {
+                    res = await getRepliesByTweetId(post.post.tweet_id);
                     res.results?.forEach((item: any) => {
                         list.push(item);
                     });
                     continuation_token = res.continuation_token;
-                } else continuation_token = post.continuation.reply_id;
+                } else continuation_token = post.reply_id;
                 while (1) {
-                    res = await getRepliesContinuationByTweetId(post.tweet_id, continuation_token);
+                    res = await getRepliesContinuationByTweetId(post.post.tweet_id, continuation_token);
                     continuation_token = res.continuation_token;
                     if (res.replies === undefined || res.replies?.length < 1) break;
                     res.replies.forEach((item: any) => {
                         list.push(item);
                     });
                 }
-                await updateContinuation(post.id, { reply_id: continuation_token });
+                await updateContinuation(post.post.id, { reply_id: continuation_token });
                 return list.filter((item: any) => {
                     return engagerList.findIndex((engager) => {
                         return engager.xaccount.username === item.user.username
@@ -209,22 +209,22 @@ export const fillRetweetListHandler = async (tweetList: any[], engagerList: any[
                 let list: any[] = [];
                 let res;
                 let continuation_token;
-                if (post.continuation.quote_id === null) {
-                    res = await getRetweetsByTweetId(post.tweet_id);
+                if (post.retweet_id === null) {
+                    res = await getRetweetsByTweetId(post.post.tweet_id);
                     res.results?.forEach((item: any) => {
                         list.push(item);
                     });
                     continuation_token = res.continuation_token;
-                } else continuation_token = post.continuation.retweet_id;
+                } else continuation_token = post.retweet_id;
                 while (1) {
-                    res = await getRetweetsContinuationByTweetId(post.tweet_id, continuation_token);
+                    res = await getRetweetsContinuationByTweetId(post.post.tweet_id, continuation_token);
                     continuation_token = res.continuation_token;
-                    if (res.retweets?.length < 1) return [];
+                    if (res.retweets === undefined || res.retweets?.length < 1) return [];
                     res.retweets.forEach((item: any) => {
                         list.push(item);
                     });
                 }
-                await updateContinuation(post.id, { retweet_id: continuation_token });
+                await updateContinuation(post.post.id, { retweet_id: continuation_token });
                 return list.filter((item: any) => {
                     return engagerList.findIndex((engager) => {
                         return engager.xaccount.username === item.user.username

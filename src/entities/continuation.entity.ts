@@ -9,12 +9,12 @@ export class Continuation extends Model {
     @JoinColumn({ name: 'post_id' })
     post: Post;
 
-    @Column({ length: 1000, nullable: true })
+    @Column({ type: "text", nullable: true })
     quote_id: string;
 
-    @Column({ length: 1000, nullable: true })
+    @Column({ type: "text", nullable: true })
     reply_id: string;
 
-    @Column({ length: 1000, nullable: true })
+    @Column({ type: "text", nullable: true })
     retweet_id: string;
 };

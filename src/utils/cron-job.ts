@@ -6,7 +6,6 @@ import {
   fillReplyListHandler,
   fillRetweetListHandler
 } from "../controllers/post.controller";
-import { setScoreByAccountHandler } from "../controllers/score.controller";
 
 import { getEngagerListHandler } from '../controllers/user.controller';
 
