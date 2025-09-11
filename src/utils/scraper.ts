@@ -7,7 +7,7 @@ export const getTwitterAccount = (twitterAccount: string) => {
         port: null,
         path: `/user/details?username=${twitterAccount}`,
         headers: {
-            'x-rapidapi-key': '72571114c2msh8b8ec59a34d3b89p1ff3d5jsn7996d934301d',
+            'x-rapidapi-key': '3fb981e810mshcaddf3a155a47fcp1d7784jsn6fb6d8e121e6',
             'x-rapidapi-host': 'twitter154.p.rapidapi.com'
         }
     };
@@ -50,7 +50,7 @@ export const getTweetsByUser = (handle: string) => {
         port: null,
         path: `/user/tweets?username=${handle}&section=top&limit=50&include_pinned=true&include_hashtag=true&include_ticker=true`,
         headers: {
-            'x-rapidapi-key': '72571114c2msh8b8ec59a34d3b89p1ff3d5jsn7996d934301d',
+            'x-rapidapi-key': '3fb981e810mshcaddf3a155a47fcp1d7784jsn6fb6d8e121e6',
             'x-rapidapi-host': 'twitter154.p.rapidapi.com'
         }
     };
@@ -93,7 +93,7 @@ export const getTweetsContinuationByUser = (handle: string, continuation_token: 
         port: null,
         path: `/user/tweets/continuation?username=${handle}&section=top&limit=50&include_pinned=true&include_hashtag=true&include_ticker=true&continuation_token=${continuation_token}`,
         headers: {
-            'x-rapidapi-key': '72571114c2msh8b8ec59a34d3b89p1ff3d5jsn7996d934301d',
+            'x-rapidapi-key': '3fb981e810mshcaddf3a155a47fcp1d7784jsn6fb6d8e121e6',
             'x-rapidapi-host': 'twitter154.p.rapidapi.com'
         }
     };
@@ -136,7 +136,7 @@ export const getTweetsBySearch = (query: string) => {
         port: null,
         path: `/search/search?query=${query}&section=top&limit=50`,
         headers: {
-            'x-rapidapi-key': '72571114c2msh8b8ec59a34d3b89p1ff3d5jsn7996d934301d',
+            'x-rapidapi-key': '3fb981e810mshcaddf3a155a47fcp1d7784jsn6fb6d8e121e6',
             'x-rapidapi-host': 'twitter154.p.rapidapi.com'
         }
     };
@@ -187,7 +187,7 @@ export const getQuotesByTweetId = (tweet_id: string) => {
         port: null,
         path: `/search/search?${queryString}`,
         headers: {
-            'x-rapidapi-key': '72571114c2msh8b8ec59a34d3b89p1ff3d5jsn7996d934301d',
+            'x-rapidapi-key': '3fb981e810mshcaddf3a155a47fcp1d7784jsn6fb6d8e121e6',
             'x-rapidapi-host': 'twitter154.p.rapidapi.com'
         }
     };
@@ -238,7 +238,7 @@ export const getQuotesContinuationByTweetId = (tweet_id: string, continuation_to
         port: null,
         path: `/search/search/continuation?${queryString}&continuation_token=${continuation_token}`,
         headers: {
-            'x-rapidapi-key': '72571114c2msh8b8ec59a34d3b89p1ff3d5jsn7996d934301d',
+            'x-rapidapi-key': '3fb981e810mshcaddf3a155a47fcp1d7784jsn6fb6d8e121e6',
             'x-rapidapi-host': 'twitter154.p.rapidapi.com'
         }
     };
@@ -281,7 +281,7 @@ export const getRepliesByTweetId = (tweet_id: string) => {
         port: null,
         path: `/tweet/replies?tweet_id=${tweet_id}&section=top&limit=50`,
         headers: {
-            'x-rapidapi-key': '72571114c2msh8b8ec59a34d3b89p1ff3d5jsn7996d934301d',
+            'x-rapidapi-key': '3fb981e810mshcaddf3a155a47fcp1d7784jsn6fb6d8e121e6',
             'x-rapidapi-host': 'twitter154.p.rapidapi.com'
         }
     };
@@ -324,7 +324,7 @@ export const getRepliesContinuationByTweetId = (tweet_id: string, continuation_t
         port: null,
         path: `/tweet/replies/continuation?tweet_id=${tweet_id}&section=top&limit=50&continuation_token=${continuation_token}`,
         headers: {
-            'x-rapidapi-key': '72571114c2msh8b8ec59a34d3b89p1ff3d5jsn7996d934301d',
+            'x-rapidapi-key': '3fb981e810mshcaddf3a155a47fcp1d7784jsn6fb6d8e121e6',
             'x-rapidapi-host': 'twitter154.p.rapidapi.com'
         }
     };
@@ -367,7 +367,7 @@ export const getRetweetsByTweetId = (tweet_id: string) => {
         port: null,
         path: `/tweet/retweets?tweet_id=${tweet_id}&section=top&limit=50`,
         headers: {
-            'x-rapidapi-key': '72571114c2msh8b8ec59a34d3b89p1ff3d5jsn7996d934301d',
+            'x-rapidapi-key': '3fb981e810mshcaddf3a155a47fcp1d7784jsn6fb6d8e121e6',
             'x-rapidapi-host': 'twitter154.p.rapidapi.com'
         }
     };
@@ -410,7 +410,7 @@ export const getRetweetsContinuationByTweetId = (tweet_id: string, continuation_
         port: null,
         path: `/tweet/retweets/continuation?tweet_id=${tweet_id}&section=top&limit=50&continuation_token=${continuation_token}`,
         headers: {
-            'x-rapidapi-key': '72571114c2msh8b8ec59a34d3b89p1ff3d5jsn7996d934301d',
+            'x-rapidapi-key': '3fb981e810mshcaddf3a155a47fcp1d7784jsn6fb6d8e121e6',
             'x-rapidapi-host': 'twitter154.p.rapidapi.com'
         }
     };

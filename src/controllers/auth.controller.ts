@@ -73,11 +73,12 @@ export const signUpHandler = async (req: Request, res: Response, _next: NextFunc
             res.status(409).json("Twitter account already Exist");
         }
 
+        const twitterAccount = JSON.parse(await getTwitterAccount(req.body.twitterAccount));
+        console.log(twitterAccount);
+
         const user = await saveUser({
             wallet_address: req.body.address,
         });
-
-        const twitterAccount = JSON.parse(await getTwitterAccount(req.body.twitterAccount));
 
         if (twitterAccount?.user_id) {
             saveProfile({

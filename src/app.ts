@@ -7,7 +7,6 @@ const cors = require("cors");
 import router from "./routes";
 import { errorHandler } from './middlewares/errorHandler';
 import { cron } from './utils/cron-job';
-import superfluid from "./utils/superfluid";
 
 dotenv.config();
 
@@ -18,9 +17,6 @@ app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use('/api', router);
 app.use(errorHandler);
-
-// Initialize Superfluid integration
-superfluid(app);
 
 const port = process.env.PORT || 5000;
 

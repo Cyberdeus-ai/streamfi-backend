@@ -12,7 +12,7 @@ export class User extends Model
     @Column({ unique: true, length: 100 })
     wallet_address: string;
 
-    @Column({ length: 100 })
+    @Column({ length: 100, nullable: true })
     account_type: string;
 
     @OneToOne(() => XAccount, (xaccount) => xaccount.user)

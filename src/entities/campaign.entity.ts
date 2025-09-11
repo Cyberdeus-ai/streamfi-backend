@@ -22,8 +22,8 @@ export class Campaign extends Model
     @Column('text', { array: true })
     handles: string[];
 
-    @Column({ type: 'double precision' })
-    reward_pool: number;
+    @Column({ length: 255, nullable: true })
+    reward_pool: string;
 
     @Column('text', { array: true })
     big_accounts: string[];
