@@ -1,65 +1,46 @@
 import { Request, Response } from "express";
 import {
-    findScoreList,
     findScoreListByCondition,
-    findScoreUserList,
     findGainScoreList,
     findFirstScoreList,
-    insertScoreList
+    insertScoreList,
+    findUserScoreList,
+    findLatestScore,
+    findLatestScoreList
 } from '../services/score.service';
+import { insertRelativeList } from "../services/relative.service";
 import { findEngagerList } from "../services/user.service";
-import { findPostUserListByCampaign } from "../services/post.service";
+import { findPostList } from "../services/post.service";
 import scoreConfig from "../utils/score-settings";
 
-export const getScoreListHandler = async () => {
-    try {
-        const scoreList = await findScoreList();
-        return scoreList;
-    } catch (err) {
-        console.error(err);
-        return null;
-    }
-}
+type EngageType = keyof typeof scoreConfig.engage;
 
 export const getScoreListByCampaignHandler = async (req: Request, res: Response) => {
     try {
-        const postUserList = await findPostUserListByCampaign(req.body.campaignId);
         let top20ScoreList = [];
-        if (postUserList && postUserList.length > 0) {
-            let fromDate = new Date();
-            switch (req.body.period) {
-                case 0:
-                    fromDate.setDate(fromDate.getDate() - 7);
-                    break;
-                case 1:
-                    fromDate.setDate(fromDate.getDate() - 30);
-                    break;
-                case 2:
-                    fromDate.setMonth(fromDate.getMonth() - 3);
-                    break;
-                case 3:
-                    fromDate.setMonth(fromDate.getMonth() - 6);
-                    break;
-                case 4:
-                    fromDate.setFullYear(fromDate.getFullYear() - 1);
-                    break;
-                default:
-                    break;
-            }
-            const scoreList = await findScoreListByCondition(postUserList, fromDate);
-            const userList = await findScoreUserList(postUserList);
-            const top20UserList = userList.slice(0, 20);
-            top20ScoreList = top20UserList.map((user: any) => {
-                let userScoreList = scoreList.filter((score: any) => score.user_id === user.user_id);
-                if (userScoreList) {
-                    userScoreList.sort((a: any, b: any) => new Date(a.score_created_at).getTime() - new Date(b.score_created_at).getTime())
-                }
-                return {
-                    ...user,
-                    score: userScoreList
-                }
-            });
+        let fromDate = new Date();
+        switch (req.body.period) {
+            case 0:
+                fromDate.setDate(fromDate.getDate() - 7);
+                break;
+            case 1:
+                fromDate.setDate(fromDate.getDate() - 30);
+                break;
+            case 2:
+                fromDate.setMonth(fromDate.getMonth() - 3);
+                break;
+            case 3:
+                fromDate.setMonth(fromDate.getMonth() - 6);
+                break;
+            case 4:
+                fromDate.setFullYear(fromDate.getFullYear() - 1);
+                break;
+            default:
+                break;
         }
+
+        top20ScoreList = await findScoreListByCondition(fromDate, req.body.campaignId);
+        console.log(top20ScoreList);
 
         res.status(200).json({
             result: true,
@@ -73,31 +54,31 @@ export const getScoreListByCampaignHandler = async (req: Request, res: Response)
 
 export const getGainScoreListByCampaignHandler = async (req: Request, res: Response) => {
     try {
-        const postUserList = await findPostUserListByCampaign(req.body.campaignId);
-
         let userList = [];
         let gainerList = [];
         let loserList = [];
 
-        if (postUserList && postUserList.length > 0) {
-            userList = await findGainScoreList(postUserList);
-            const firstScoreList = await findFirstScoreList();
+        userList = await findGainScoreList(req.body.campaignId);
+        const firstScoreList = await findFirstScoreList(req.body.campaignId);
 
-            const gainUserList = userList.map((user: any) => {
-                const userFirstScore = firstScoreList.find((score: any) => score.user.id === user.user_id);
-                return {
-                    ...user,
-                    gain: Number(user.current) - Number(userFirstScore.percentage),
-                }
-            });
+        const firstTotal = firstScoreList.reduce((total: number, current: any) => total + Number(current.value), 0);
+        const currentTotal = userList.reduce((total: number, current: any) => total + Number(current.current), 0);
 
-            gainUserList.sort((a: any, b: any) => b.gain - a.gain);
+        const gainUserList = userList.map((user: any) => {
+            const userFirstScore = firstScoreList.find((score: any) => score.user_id === user.user_id);
+            return {
+                ...user,
+                percentage: Math.ceil(user.current / currentTotal),
+                gain: Math.ceil(user.current / currentTotal) - Math.ceil(userFirstScore.value / firstTotal),
+            }
+        });
 
-            const len = gainUserList.length;
+        gainUserList.sort((a: any, b: any) => b.gain - a.gain);
 
-            gainerList = gainUserList.slice(0, 10);
-            loserList = gainUserList.slice(len - 10);
-        }
+        const len = gainUserList.length;
+
+        gainerList = gainUserList.slice(0, 10);
+        loserList = gainUserList.slice(len - 10);
 
         res.status(200).json({
             result: true,
@@ -133,15 +114,115 @@ export const setScoreByAccountHandler = async () => {
             }
         });
 
-        const total = scoreList.reduce((total: number, score: any) => total + score.value, 0);
-        scoreList = scoreList.map((score: any) => {
-            return {
-                ...score,
-                percentage: Math.round(score.value / total * 10000)
+        await insertScoreList(scoreList);
+    } catch (err) {
+        console.error(err);
+        return null;
+    }
+}
+
+export const setScoreByPostTypeHandler = async (postList: any[], type: EngageType) => {
+    try {
+        let scoreList: any[] = [];
+        postList.forEach((post: any) => {
+            const index = scoreList.findIndex((score: any) => score.user.id === post.user.id);
+            if (index > -1) {
+                scoreList[index].value += Number(scoreConfig.engage[type]);
+            } else {
+                scoreList.push({
+                    user: { id: post.user.id },
+                    value: Number(scoreConfig.engage[type]),
+                    campaign: { id: post.campaign.id }
+                });
             }
-        })
+        });
+
+        const oldScoreList = await Promise.all(scoreList.map(async (score: any) => {
+            return await findLatestScore(score.campaign.id, score.user.id);
+        }));
+
+        const userScoreList = await findUserScoreList();
+        scoreList = oldScoreList.map(async (oldScore: any, index: number) => {
+            if (oldScore && oldScore.length > 0 && oldScore[0]) {
+                return {
+                    ...scoreList[index],
+                    value: oldScore[0].value + scoreList[index].value
+                }
+            }
+            const value = userScoreList.find((userScore: any) => userScore.user.id === scoreList[index].user.id)?.value + scoreList[index].value;
+            return {
+                ...scoreList[index],
+                value: value
+            }
+        });
 
         await insertScoreList(scoreList);
+        await setRelativeHandler();
+    } catch (err) {
+        console.error(err);
+        return null;
+    }
+}
+
+export const setScoreByPostHandler = async () => {
+    try {
+        const postList = await findPostList();
+        const userScoreList = await findUserScoreList();
+        for (let i = 0; i < postList.length; i++) {
+            let scoreList: any[] = [];
+
+            postList[i].list.forEach((post: any) => {
+                const index = scoreList.findIndex((score: any) => score.user.id === post.user_id);
+                if (index > -1) {
+                    scoreList[index].value += Number(scoreConfig.engage[post.type as EngageType]);
+                } else {
+                    scoreList.push({
+                        user: { id: post.user_id },
+                        value: Number(scoreConfig.engage[postList[i].type as EngageType]),
+                        campaign: { id: postList[i].campaign_id }
+                    });
+                }
+            });
+
+            const oldScoreList = await Promise.all(scoreList.map(async (score: any) => {
+                return await findLatestScore(score.campaign.id, score.user.id);
+            }));
+
+            scoreList = oldScoreList.map((oldScore: any, index: number) => {
+                if (oldScore && oldScore.length > 0 && oldScore[0]) {
+                    return {
+                        ...scoreList[index],
+                        value: oldScore[0].value + scoreList[index].value
+                    }
+                }
+                const value = userScoreList.find((userScore: any) => userScore.user.id === scoreList[index].user.id)?.value + scoreList[index].value;
+                return {
+                    ...scoreList[index],
+                    value: value
+                }
+            });
+
+            await insertScoreList(scoreList);
+            await setRelativeHandler();
+        }
+
+    } catch (err) {
+        console.error(err);
+        return null;
+    }
+}
+
+const setRelativeHandler = async () => {
+    try {
+        const campaignList = await findLatestScoreList();
+
+        const relatives = campaignList.flatMap((campaign: any) => {
+            const total = campaign.scorelist?.reduce((total: number, current: any) => total + Number(current.value), 0);
+            const rlt = campaign.scorelist?.map((score: any) => ({ campaign: { id: campaign.campaign_id }, value: Number((Number(score.value) / total * 100).toFixed(2)), user: { id: score.user_id } }))
+            return rlt;
+        });
+
+        insertRelativeList(relatives);
     } catch (err) {
         console.error(err);
         return null;

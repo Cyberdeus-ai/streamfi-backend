@@ -3,6 +3,8 @@ import { Entity, Column, ManyToOne, JoinColumn, OneToMany } from 'typeorm';
 import Model from './model.entity';
 import { User } from './user.entity';
 import { Post } from './post.entity';
+import { Score } from './score.entity';
+import { Relative } from './relative.entity';
 
 @Entity()
 export class Campaign extends Model
@@ -30,6 +32,12 @@ export class Campaign extends Model
 
     @OneToMany(() => Post, (post) => post.campaign)
     posts: Post[];
+
+    @OneToMany(() => Score, (score) => score.campaign)
+    scores: Score[]
+
+    @OneToMany(() => Relative, (relative) => relative.campaign)
+    relatives: Relative[]
 
     @ManyToOne(() => User, (user) => user.campaigns)
     @JoinColumn({ name: "user_id" })

@@ -5,6 +5,8 @@ import { Campaign } from "./campaign.entity";
 import { Post } from "./post.entity";
 import { Score } from "./score.entity";
 import { XAccount } from "./xaccount.entity";
+import { Oversight } from "./oversight.entity";
+import { Relative } from "./relative.entity";
 
 @Entity()
 export class User extends Model
@@ -14,6 +16,9 @@ export class User extends Model
 
     @Column({ length: 100, nullable: true })
     account_type: string;
+
+    @Column({ length: 100, nullable: true })
+    ip_address: string;
 
     @OneToOne(() => XAccount, (xaccount) => xaccount.user)
     xaccount: XAccount;
@@ -26,4 +31,10 @@ export class User extends Model
 
     @OneToMany(() => Score, (score) => score.user)
     scores: Score[];
+
+    @OneToMany(() => Relative, (relative) => relative)
+    relatives: Relative[]
+
+    @OneToOne(() => Oversight, (oversight) => oversight.user)
+    oversight: Oversight;
 }

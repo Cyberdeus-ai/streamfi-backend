@@ -12,6 +12,17 @@ export const saveUser = async (input: DeepPartial<User>): Promise<any> => {
     return result;
 }
 
+export const updateIpAddress = async (userId: number, ipAddress: string) => {
+    let result: any = null;
+
+    result = await userRepo.update(
+        { id: userId },
+        { ip_address: ipAddress }
+    );
+
+    return result;
+}
+
 export const findUserList = async () => {
     let result: any = null;
 
@@ -35,7 +46,10 @@ export const findEngagerList = async (): Promise<any> => {
 
     result = await userRepo.find({
         where: { account_type: Not("Admin") },
-        relations: ["xaccount"]
+        relations: ["xaccount"],
+        order: {
+            id: "ASC"
+        }
     });
 
     return result;

@@ -1,4 +1,4 @@
-export default {
+const scoreConfig = {
     "verification": 10,
     "bigAccounts": 5,
     "accountAge": 3,
@@ -8,3 +8,5 @@ export default {
         "retweet": 1
     }
 }
+
+export default scoreConfig;

@@ -6,10 +6,11 @@ const dotenv = require('dotenv');
 
 dotenv.config();
 
-import { saveUser, updateUser, findUserByCondition } from "../services/user.service";
+import { saveUser, updateUser, findUserByCondition, updateIpAddress } from "../services/user.service";
 import { findProfileByCondition, saveProfile } from "../services/xaccount.service";
-import { saveScore, findLatestScoreList, updateIsLatest, insertScoreList } from "../services/score.service";
+import { saveScore } from "../services/score.service";
 import { findCampaignCountByUser } from '../services/campaign.service';
+import { saveOversight } from '../services/oversight.service';
 import { getTwitterAccount } from '../utils/scraper';
 import scoreConfig from '../utils/score-settings';
 
@@ -74,11 +75,21 @@ export const signUpHandler = async (req: Request, res: Response, _next: NextFunc
         }
 
         const twitterAccount = JSON.parse(await getTwitterAccount(req.body.twitterAccount));
-        console.log(twitterAccount);
 
         const user = await saveUser({
             wallet_address: req.body.address,
         });
+
+        const sameIp = await findUserByCondition({ ip_address: req.ip });
+
+        if (sameIp) {
+            await saveOversight({
+                user: { id: user.id },
+                sockpuppet_filters: "Same IP address"
+            });
+        } else {
+            await saveOversight({ user: { id: user.id } });
+        }
 
         if (twitterAccount?.user_id) {
             saveProfile({
@@ -105,18 +116,7 @@ export const signUpHandler = async (req: Request, res: Response, _next: NextFunc
 
             score += (new Date().getTime() - new Date(twitterAccount.timestamp * 1000).getTime()) / 1000 / 3600 / 8760 * scoreConfig.accountAge;
 
-            await saveScore(user.id, score, true);
-
-            const latestScoreList = await findLatestScoreList();
-            const total = latestScoreList.reduce((total: number, score: any) => Number(total) + Number(score.value), 0);
-            await updateIsLatest();
-            await insertScoreList(latestScoreList.map(async (score: any) => {
-                return {
-                    user: { id: score.user.id },
-                    value: score.value,
-                    percentage: Math.round(score.value / total * 10000)
-                }
-            }));
+            await saveScore(user.id, score);
         }
 
         res.status(200).json({

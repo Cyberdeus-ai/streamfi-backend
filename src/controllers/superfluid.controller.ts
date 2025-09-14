@@ -205,7 +205,7 @@ export const updatePoolMemberUnitsHandler = async (req: Request, res: Response) 
         if (!ethers.utils.isAddress(member)) return res.status(400).json({ success: false, error: "Invalid member address" });
 
         const result = await superfluidService.updateMemberUnits(poolAddress, member, units);
-        res.json({ success: true, txHash: result.txn.hash, message: "Member units updated" });
+        res.json({ success: true, txHash: result, message: "Member units updated" });
     } catch (error: any) {
         console.error("Failed to update member units:", error);
         res.status(500).json({ success: false, error: error.message || "Internal server error" });
@@ -215,13 +215,13 @@ export const updatePoolMemberUnitsHandler = async (req: Request, res: Response) 
 export const distributeInstantHandler = async (req: Request, res: Response) => {
     try {
         const { poolAddress } = req.params;
-        const { amount } = req.body as { amount: string | number };
+        const { superToken, adminAddress, amount } = req.body;
 
         if (!ethers.utils.isAddress(poolAddress)) return res.status(400).json({ success: false, error: "Invalid pool address" });
         if (!amount) return res.status(400).json({ success: false, error: "Amount is required" });
 
-        const result = await superfluidService.distributeInstant(poolAddress, amount);
-        res.json({ success: true, txHash: result.txn.hash, amount: result.amount, message: "Distributed to pool" });
+        const result = await superfluidService.distributeInstant(superToken, adminAddress, poolAddress, amount);
+        res.json({ success: true, txHash: result.tx.hash, amount: result.amountEther, message: "Distributed to pool" });
     } catch (error: any) {
         console.error("Failed to distribute:", error);
         res.status(500).json({ success: false, error: error.message || "Internal server error" });

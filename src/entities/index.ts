@@ -4,3 +4,5 @@ export * from "./post.entity";
 export * from "./score.entity";
 export * from "./xaccount.entity";
 export * from "./continuation.entity";
+export * from "./oversight.entity";
+export * from "./relative.entity";

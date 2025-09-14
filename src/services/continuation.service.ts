@@ -24,7 +24,7 @@ export const updateContinuation = async (postId: any, continuation: any) => {
     let result: any = null;
 
     result = await contiRepo.update(
-        { post: postId },
+        { post: { id: postId } },
         continuation
     );
 

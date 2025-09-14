@@ -13,7 +13,7 @@ export const createCampaignHandler = async (req: Request, res: Response) => {
     try {
         const token = req.headers.authorization?.split(" ")[1];
         const decoded = jwt.verify(token!, secretKey);
-        
+
         const newCampaign = await createCampaign({
             start_date: req.body.startDate,
             end_date: req.body.endDate,
@@ -22,11 +22,11 @@ export const createCampaignHandler = async (req: Request, res: Response) => {
             handles: req.body.handles,
             reward_pool: req.body.rewardPool,
             big_accounts: req.body.bigAccounts,
-            user: decoded.id
+            user: { id: decoded.id }
         });
 
         fillTweetListHandler(newCampaign.hashtags, newCampaign.tickers, newCampaign.handles, decoded.id, newCampaign.id);
-        
+
         res.status(200).json({
             result: true,
             newCampaign: newCampaign
@@ -44,7 +44,7 @@ export const getCampaignListHandler = async (_req: Request, res: Response) => {
         res.status(200).json({
             result: true,
             campaignList: campaignList
-        }) 
+        })
     } catch (err) {
         console.error(err);
         res.status(500).send(err);

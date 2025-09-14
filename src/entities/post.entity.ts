@@ -1,4 +1,4 @@
-import { Entity, Column, JoinColumn, ManyToOne, OneToMany, OneToOne } from "typeorm";
+import { Entity, Column, JoinColumn, ManyToOne, OneToOne } from "typeorm";
 
 import Model from './model.entity';
 import { Campaign } from "./campaign.entity";

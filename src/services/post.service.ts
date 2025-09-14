@@ -25,9 +25,20 @@ export const savePost = async (post: DeepPartial<Post>) => {
 export const findPostList = async () => {
 	let result: any = null;
 
-	result = await postRepo.find({
-		relations: ['campaign', 'user', 'continuation']
-	});
+	result = await postRepo.query(`
+		SELECT
+			pt.campaign_id,
+			pt.type,
+			jsonb_agg(
+				jsonb_build_object(
+					'id', pt.id,
+					'user_id', pt.user_id
+				)
+				ORDER BY pt.id ASC
+			) AS list
+		FROM post pt
+		WHERE pt.type != 'tweet'
+		GROUP BY pt.campaign_id, pt.type;`)
 
 	return result;
 }
@@ -64,28 +75,14 @@ export const findPostUserListByCampaign = async (campaignId: number) => {
 export const findTweetList = async () => {
 	let result: any = null;
 
-	result = await contRepo.find({
-		relations: ['post']
-	});
-
-	return result;
-}
-
-export const updatePost = async (post: any) => {
-	let result: any = null;
-
-	result = await postRepo.update(
-		{
-			id: post.id
-		},
-		{
-			tweet_id: post.tweet_id,
-			type: post.type,
-			user: post.userId,
-			campaign: post.campaignId,
-			timestamp: moment(post.timestamp * 1000)
-		}
-	)
+	result = await postRepo
+		.createQueryBuilder('post')
+		.innerJoin('post.campaign', 'campaign')
+		.leftJoin('continuation', 'cont', 'post.id = cont.post_id')
+		.select(['post.id as id', 'post.tweet_id as tweet_id', 'campaign.id as campaign_id', 'cont.quote_id as quote_id', 'cont.reply_id as reply_id', 'cont.retweet_id as retweet_id'])
+		.where('post.type = :type', { type: 'tweet' })
+		.groupBy('post.id, campaign.id, cont.id')
+		.getRawMany();
 
 	return result;
 }

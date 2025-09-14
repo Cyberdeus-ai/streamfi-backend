@@ -5,15 +5,14 @@ import { User } from './user.entity';
 import { Campaign } from './campaign.entity';
 
 @Entity()
-export class Score extends Model
-{
+export class Relative extends Model {
     @Column({ type: 'double precision' })
     value: number;
 
     @ManyToOne(() => User, (user) => user.scores)
     @JoinColumn({ name: "user_id" })
     user: User;
-    
+
     @ManyToOne(() => Campaign, (campaign) => campaign.scores, { nullable: true })
     @JoinColumn({ name: "campaign_id" })
     campaign: Campaign;

@@ -2,21 +2,16 @@ const { Framework } = require("@superfluid-finance/sdk-core");
 const { ethers } = require("ethers");
 require("dotenv").config();
 
+const { GDAv1Forwarder } = require("./constants");
+
 const forwarderAddress = "0x6DA13Bde224A05a288748d857b9e7DDEffd1dE08";
-const forwarderABI = [
-    "function createPool(address token, address admin, (uint32 transferabilityForUnitsOwner, bool distributionFromAnyAddress) memory poolConfig) external returns (bool, address)"
-];
+const forwarderABI = GDAv1Forwarder;
 
 interface FlowInfo {
     flowRate: string;
     deposit: string;
     owedDeposit: string;
     timestamp: string;
-}
-
-interface PoolConfig {
-    transferabilityForUnitsOwner?: boolean;
-    distributionFromAnyAddress?: boolean;
 }
 
 class SuperfluidService {
@@ -219,37 +214,51 @@ class SuperfluidService {
         }
     }
 
-    async updateMemberUnits(poolAddress: string, member: string, units: string | number): Promise<{ txn: any; }> {
+    async updateMemberUnits(poolAddress: string, member: string, units: string | number) {
         this.ensureInitialized();
         try {
-            const unitsStr = units.toString();
-            const op = this.sf.poolV1.updateMemberUnits({
+            const contract = new ethers.Contract(forwarderAddress, forwarderABI, this.signer);
+
+            const tx = await contract.updateMemberUnits(
                 poolAddress,
                 member,
-                units: unitsStr,
-            });
-            const txn = await op.exec(this.signer);
-            await txn.wait();
-            console.log(`✅ Updated member units in pool ${poolAddress}: ${member} => ${unitsStr}`);
-            return { txn };
+                units,
+                "0x"
+            );
+            await tx.wait();
+
+            console.log(tx);
+
+            return tx;
+
         } catch (error) {
             console.error("❌ Error updating member units:", error);
             throw error;
         }
     }
 
-    async distributeInstant(poolAddress: string, amountEther: string | number): Promise<{ txn: any; amount: string; }> {
+    async distributeInstant(superTokenAddress: string, adminAddress: string,  poolAddress: string, amount: string | number) {
         this.ensureInitialized();
         try {
-            const amount = ethers.utils.parseEther(amountEther.toString()).toString();
-            const op = this.sf.poolV1.distribute({
+            const contract = new ethers.Contract(
+                forwarderAddress,
+                forwarderABI,
+                this.signer
+            );
+
+            const amountEther = ethers.utils.parseEther(amount);
+
+            const tx = await contract.distribute(
+                superTokenAddress,
+                adminAddress,
                 poolAddress,
-                amount,
-            });
-            const txn = await op.exec(this.signer);
-            await txn.wait();
+                amountEther,
+                "0x"
+            );
+            await tx.wait();
+            
             console.log(`✅ Distributed ${amountEther} to pool ${poolAddress}`);
-            return { txn, amount };
+            return { tx, amountEther };
         } catch (error) {
             console.error("❌ Error distributing to pool:", error);
             throw error;

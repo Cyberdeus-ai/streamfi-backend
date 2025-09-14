@@ -1,6 +1,7 @@
+import { Request, Response } from "express";
 import { findEngagerList, findUserList } from "../services/user.service";
 
-export const getEngagerListHandler = async () => {
+export const getCampaignListByUserHandler = async (req: Request, res: Response) => {
     try {
         const engagerList = await findEngagerList();
         return engagerList;
