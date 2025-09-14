@@ -7,8 +7,6 @@ import { Continuation } from "./continuation.entity";
 
 @Entity()
 export class Oversight extends Model {
-    @Column({ type: 'timestamptz', precision: 3, default: () => `now()` })
-    joined_at: Date;
 
     @Column({ length: 100, nullable: true })
     bot_detection: string;
@@ -16,14 +14,14 @@ export class Oversight extends Model {
     @Column({ length: 100, nullable: true })
     sockpuppet_filters: string;
 
-    @Column({ length: 100, nullable: true })
-    wallet_status: string;
+    @Column({ nullable: true })
+    wallet_status: boolean;
 
-    @Column({ length: 100, nullable: true })
-    is_ban: string;
+    @Column({ nullable: true })
+    is_ban: boolean;
 
-    @Column({ length: 100, nullable: true })
-    stream_status: string;
+    @Column({ nullable: true })
+    stream_status: boolean;
 
     @OneToOne(() => User)
     @JoinColumn({ name: "user_id" })

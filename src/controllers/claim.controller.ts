@@ -1,10 +1,21 @@
 import { Request, Response } from "express";
-import { findEngagerList, findUserList } from "../services/user.service";
+const jwt = require("jsonwebtoken");
+import { findUserList } from "../services/user.service";
+import { findCampaignListByUser } from "../services/campaign.service";
+
+require('dotenv').config();
 
 export const getCampaignListByUserHandler = async (req: Request, res: Response) => {
     try {
-        const engagerList = await findEngagerList();
-        return engagerList;
+        const token = req.headers.authorization?.split(" ")[1];
+        const decoded = jwt.verify(token, process.env.JWT_SECRET_KEY);
+        
+        const campaignList = await findCampaignListByUser(decoded.id);
+        
+        res.status(200).json({
+            result: true,
+            campaignList
+        });
     } catch (err) {
         console.error(err);
         return null;

@@ -50,3 +50,18 @@ export const updateOversightList = async (list: any[], field: string) => {
 
     return result;
 }
+
+export const getBadUserList = async () => {
+    let result: any = null;
+
+    result = await oversightRepo.query(`
+            SELECT 
+                os.created_at, os.bot_detection, os.sockpuppet_filters, os.wallet_status, os.is_ban, os.stream_status, 
+                xa.*
+            FROM oversight os
+            LEFT JOIN x_account xa ON xa.user_id = os.user_id
+            ORDER BY os.id DESC 
+        `);
+
+    return result;
+}

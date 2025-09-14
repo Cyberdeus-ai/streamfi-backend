@@ -1,13 +1,11 @@
 import { Request, Response } from "express";
 import {
-    findScoreListByCondition,
-    findGainScoreList,
-    findFirstScoreList,
     insertScoreList,
     findUserScoreList,
     findLatestScore,
     findLatestScoreList
 } from '../services/score.service';
+import { findGainScoreList, findFirstScoreList, findScoreListByCondition } from "../services/relative.service";
 import { insertRelativeList } from "../services/relative.service";
 import { findEngagerList } from "../services/user.service";
 import { findPostList } from "../services/post.service";
@@ -61,15 +59,12 @@ export const getGainScoreListByCampaignHandler = async (req: Request, res: Respo
         userList = await findGainScoreList(req.body.campaignId);
         const firstScoreList = await findFirstScoreList(req.body.campaignId);
 
-        const firstTotal = firstScoreList.reduce((total: number, current: any) => total + Number(current.value), 0);
-        const currentTotal = userList.reduce((total: number, current: any) => total + Number(current.current), 0);
-
         const gainUserList = userList.map((user: any) => {
             const userFirstScore = firstScoreList.find((score: any) => score.user_id === user.user_id);
             return {
                 ...user,
-                percentage: Math.ceil(user.current / currentTotal),
-                gain: Math.ceil(user.current / currentTotal) - Math.ceil(userFirstScore.value / firstTotal),
+                percentage: user.current,
+                gain: Math.ceil(user.current) - Math.ceil(userFirstScore.value),
             }
         });
 

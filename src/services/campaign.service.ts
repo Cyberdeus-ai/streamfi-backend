@@ -70,3 +70,17 @@ export const findCampaignCountByUser = async (userId: number) => {
 
     return result;
 }
+
+export const findCampaignListByUser = async (userId: number) => {
+    let result: any = null;
+
+    result = await campaignRepo.query(`
+            select post.user_id, campaign.*
+            from post
+            inner join campaign on campaign.id = post.campaign_id
+            where post.user_id = $1
+            group by post.user_id, campaign.id;
+        `, [userId]);
+
+    return result;
+}

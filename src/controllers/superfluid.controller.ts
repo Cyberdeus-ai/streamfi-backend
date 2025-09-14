@@ -76,47 +76,40 @@ export const setStreamBasedOnScore = async (req: Request, res: Response) => {
 
 export const getSuperFluidInfoHandler = async (req: Request, res: Response) => {
     try {
-        async (req: Request, res: Response) => {
-            try {
-                const { userAddress } = req.params;
+        const { userAddress } = req.params;
 
-                if (!ethers.utils.isAddress(userAddress)) {
-                    return res.status(400).json({
-                        success: false,
-                        error: "Invalid user address"
-                    });
-                }
-
-                const flowInfo = await superfluidService.getFlow(userAddress);
-
-                if (!flowInfo) {
-                    return res.json({
-                        success: true,
-                        hasStream: false,
-                        message: "No active stream found"
-                    });
-                }
-
-                res.json({
-                    success: true,
-                    hasStream: true,
-                    flowInfo: {
-                        ...flowInfo,
-                        flowRateFormatted: `${ethers.utils.formatEther(flowInfo.flowRate)} tokens/second`
-                    }
-                });
-
-            } catch (error: any) {
-                console.error("Failed to get stream info:", error);
-                res.status(500).json({
-                    success: false,
-                    error: error.message || "Internal server error"
-                });
-            }
+        if (!ethers.utils.isAddress(userAddress)) {
+            return res.status(400).json({
+                success: false,
+                error: "Invalid user address"
+            });
         }
-    } catch (err) {
-        console.error(err)
-        res.status(500).send(err);
+
+        const flowInfo = await superfluidService.getFlow(userAddress);
+
+        if (!flowInfo) {
+            return res.json({
+                success: true,
+                hasStream: false,
+                message: "No active stream found"
+            });
+        }
+
+        res.json({
+            success: true,
+            hasStream: true,
+            flowInfo: {
+                ...flowInfo,
+                flowRateFormatted: `${ethers.utils.formatEther(flowInfo.flowRate)} tokens/second`
+            }
+        });
+
+    } catch (error: any) {
+        console.error("Failed to get stream info:", error);
+        res.status(500).json({
+            success: false,
+            error: error.message || "Internal server error"
+        });
     }
 }
 
