@@ -1,3 +1,0 @@
-"id","created_at","updated_at","bot_detection","sockpuppet_filters","user_id","is_ban","stream_status","wallet_status"
-1,"2025-09-15 02:42:09.623529","2025-09-15 02:42:09.623529","high frequency",NULL,18,False,False,True
-2,"2025-09-15 02:44:16.174573","2025-09-15 02:44:16.174573",NULL,"same IP address",23,False,True,False
