@@ -79,6 +79,7 @@ export const findCampaignListByUser = async (userId: number) => {
             from post
             inner join campaign on campaign.id = post.campaign_id
             where post.user_id = $1
+            and post.type != 'tweet'
             group by post.user_id, campaign.id;
         `, [userId]);
 
