@@ -9,6 +9,9 @@ import { Relative } from './relative.entity';
 @Entity()
 export class Campaign extends Model
 {
+    @Column({ length: 100, nullable: true })
+    name: string;
+    
     @Column({ type: 'timestamptz', precision: 3, default: () => `now()` })
     start_date: Date;
 

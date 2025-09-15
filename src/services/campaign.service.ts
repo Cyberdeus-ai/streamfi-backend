@@ -1,7 +1,7 @@
 import { DeepPartial } from "typeorm";
 
 import { AppDataSource } from "../utils/data-source";
-import { Campaign, Post } from "../entities";
+import { Campaign, Post, XAccount } from "../entities";
 
 const campaignRepo = AppDataSource.getRepository(Campaign);
 
@@ -24,6 +24,7 @@ export const getCampaignList = async () => {
 
     result = await campaignRepo.createQueryBuilder("camp")
         .select("camp.id", "id")
+        .addSelect("camp.name", "name")
         .addSelect("camp.start_date", "start_date")
         .addSelect("camp.end_date", "end_date")
         .addSelect("camp.reward_pool", "reward_pool")
@@ -37,8 +38,12 @@ export const getCampaignList = async () => {
         .addSelect("COUNT(CASE WHEN pt.type = 'quote' THEN 1 END)", "quote")
         .addSelect("COUNT(CASE WHEN pt.type = 'reply' THEN 1 END)", "reply")
         .addSelect("COUNT(CASE WHEN pt.type = 'retweet' THEN 1 END)", "retweet")
+        .addSelect("xa.name", "xa_name")
+        .addSelect("xa.username", "xa_username")
         .leftJoin(Post, "pt", "pt.campaign_id = camp.id")
-        .groupBy("camp.id")
+        .leftJoin(XAccount, "xa", "xa.user_id = camp.user_id")
+        .groupBy("camp.id, xa.username, xa.name")
+        .orderBy("camp.created_at", "DESC")
         .getRawMany();
 
     return result;

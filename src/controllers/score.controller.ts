@@ -64,16 +64,19 @@ export const getGainScoreListByCampaignHandler = async (req: Request, res: Respo
             return {
                 ...user,
                 percentage: user.current,
-                gain: Math.ceil(user.current) - Math.ceil(userFirstScore.value),
+                gain: Number(user.current) - Number(userFirstScore.value),
+                oneweek: user.oneweek ?  Number(user.current) - Number(user.oneweek) : 0,
+                onemonth: user.onemonth ? Number(user.current) - Number(user.onemonth) : 0,
+                threemonths: user.threemonths ? Number(user.current) - Number(user.threemonths) : 0,
+                sixmonths: user.sixmonths ? Number(user.current) - Number(user.sixmonths) : 0,
+                oneyear: user.oneyear ? Number(user.current) - Number(user.oneyear) : 0
             }
         });
 
         gainUserList.sort((a: any, b: any) => b.gain - a.gain);
 
-        const len = gainUserList.length;
-
         gainerList = gainUserList.slice(0, 10);
-        loserList = gainUserList.slice(len - 10);
+        loserList = gainUserList.slice(-10).reverse();
 
         res.status(200).json({
             result: true,

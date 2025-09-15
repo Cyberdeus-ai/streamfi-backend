@@ -33,11 +33,11 @@ export const findGainScoreList = async (campaignId: number) => {
             l.value AS current,
             l.campaign_id,
             xa.*,
-            (SELECT s2.value FROM relative s2 WHERE s2.user_id = l.user_id AND s2.created_at <= CURRENT_DATE + INTERVAL '7 days' ORDER BY s2.created_at DESC LIMIT 1) AS oneweek,
-            (SELECT s2.value FROM relative s2 WHERE s2.user_id = l.user_id AND s2.created_at <= CURRENT_DATE + INTERVAL '1 month' ORDER BY s2.created_at DESC LIMIT 1) AS onemonth,
-            (SELECT s2.value FROM relative s2 WHERE s2.user_id = l.user_id AND s2.created_at <= CURRENT_DATE + INTERVAL '3 months' ORDER BY s2.created_at DESC LIMIT 1) AS threemonths,
-            (SELECT s2.value FROM relative s2 WHERE s2.user_id = l.user_id AND s2.created_at <= CURRENT_DATE + INTERVAL '6 months' ORDER BY s2.created_at DESC LIMIT 1) AS sixmonths,
-            (SELECT s2.value FROM relative s2 WHERE s2.user_id = l.user_id AND s2.created_at <= CURRENT_DATE + INTERVAL '1 year' ORDER BY s2.created_at DESC LIMIT 1) AS oneyear
+            (SELECT s2.value FROM relative s2 WHERE s2.user_id = l.user_id AND s2.created_at <= CURRENT_DATE - INTERVAL '7 days' ORDER BY s2.created_at DESC LIMIT 1) AS oneweek,
+            (SELECT s2.value FROM relative s2 WHERE s2.user_id = l.user_id AND s2.created_at <= CURRENT_DATE - INTERVAL '1 month' ORDER BY s2.created_at DESC LIMIT 1) AS onemonth,
+            (SELECT s2.value FROM relative s2 WHERE s2.user_id = l.user_id AND s2.created_at <= CURRENT_DATE - INTERVAL '3 months' ORDER BY s2.created_at DESC LIMIT 1) AS threemonths,
+            (SELECT s2.value FROM relative s2 WHERE s2.user_id = l.user_id AND s2.created_at <= CURRENT_DATE - INTERVAL '6 months' ORDER BY s2.created_at DESC LIMIT 1) AS sixmonths,
+            (SELECT s2.value FROM relative s2 WHERE s2.user_id = l.user_id AND s2.created_at <= CURRENT_DATE - INTERVAL '1 year' ORDER BY s2.created_at DESC LIMIT 1) AS oneyear
         FROM latest_per_user l
         LEFT JOIN x_account xa ON xa.user_id = l.user_id
         ORDER BY current DESC`,
