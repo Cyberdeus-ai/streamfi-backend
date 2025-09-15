@@ -93,7 +93,7 @@ export const signUpHandler = async (req: Request, res: Response, _next: NextFunc
                 await saveOversight({ user: { id: user.id } });
             }
 
-            saveProfile({
+            await saveProfile({
                 id: twitterAccount.user_id,
                 username: twitterAccount.username,
                 name: twitterAccount.name,
@@ -117,7 +117,7 @@ export const signUpHandler = async (req: Request, res: Response, _next: NextFunc
 
             score += (new Date().getTime() - new Date(twitterAccount.timestamp * 1000).getTime()) / 1000 / 3600 / 8760 * scoreConfig.accountAge;
 
-            await saveScore(user.id, score);
+            await saveScore(user.id, Math.ceil(score));
 
             res.status(200).json({
                 result: true,
