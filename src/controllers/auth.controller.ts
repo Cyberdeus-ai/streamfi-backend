@@ -76,25 +76,23 @@ export const signUpHandler = async (req: Request, res: Response, _next: NextFunc
 
         const twitterAccount = await getTwitterAccount(req.body.twitterAccount);
 
-        const sameIp = await findUserByCondition({ ip_address: req.ip });
-
-        const user = await saveUser({
-            wallet_address: req.body.address,
-            ip_address: req.ip
-        });
-
-        if (sameIp) {
-            await saveOversight({
-                user: { id: user.id },
-                sockpuppet_filters: "Same IP address"
-            });
-        } else {
-            await saveOversight({ user: { id: user.id } });
-        }
-
-        console.log(twitterAccount);
-
         if (twitterAccount?.user_id) {
+            const sameIp = await findUserByCondition({ ip_address: req.ip });
+
+            const user = await saveUser({
+                wallet_address: req.body.address,
+                ip_address: req.ip
+            });
+
+            if (sameIp) {
+                await saveOversight({
+                    user: { id: user.id },
+                    sockpuppet_filters: "Same IP address"
+                });
+            } else {
+                await saveOversight({ user: { id: user.id } });
+            }
+
             saveProfile({
                 id: twitterAccount.user_id,
                 username: twitterAccount.username,
@@ -120,12 +118,16 @@ export const signUpHandler = async (req: Request, res: Response, _next: NextFunc
             score += (new Date().getTime() - new Date(twitterAccount.timestamp * 1000).getTime()) / 1000 / 3600 / 8760 * scoreConfig.accountAge;
 
             await saveScore(user.id, score);
+
+            res.status(200).json({
+                result: true,
+                userId: user.id
+            });
         }
 
-        res.status(200).json({
-            result: true,
-            userId: user.id
-        });
+        else {
+            res.status(400).json("Invalid Twitter Account");
+        }
     } catch (err) {
         console.error(err);
         res.status(500).send(err);
