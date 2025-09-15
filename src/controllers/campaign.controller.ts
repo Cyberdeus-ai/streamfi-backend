@@ -15,6 +15,7 @@ export const createCampaignHandler = async (req: Request, res: Response) => {
         const decoded = jwt.verify(token!, secretKey);
 
         const newCampaign = await createCampaign({
+            name: req.body.name,
             start_date: req.body.startDate,
             end_date: req.body.endDate,
             hashtags: req.body.hashtags,

@@ -8,7 +8,28 @@ const campaignRepo = AppDataSource.getRepository(Campaign);
 export const createCampaign = async (input: DeepPartial<Campaign>): Promise<any> => {
     let result: any = null;
 
-    result = await campaignRepo.save(input);
+    const newCampaign = await campaignRepo.save(input);
+
+    result = await campaignRepo
+        .createQueryBuilder("camp")
+        .select("camp.id", "id")
+        .addSelect("camp.name", "name")
+        .addSelect("camp.start_date", "start_date")
+        .addSelect("camp.end_date", "end_date")
+        .addSelect("camp.reward_pool", "reward_pool")
+        .addSelect("camp.hashtags", "hashtags")
+        .addSelect("camp.tickers", "tickers")
+        .addSelect("camp.handles", "handles")
+        .addSelect("camp.user_id", "user_id")
+        .addSelect("camp.created_at", "created_at")
+        .addSelect("camp.updated_at", "updated_at")
+        .addSelect("xa.name", "xa_name")
+        .addSelect("xa.username", "xa_username")
+        .leftJoin(XAccount, "xa", "xa.user_id = camp.user_id")
+        .where('camp.id = :campaignId', { campaignId: newCampaign.id })
+        .groupBy("camp.id, xa.username, xa.name")
+        .orderBy("camp.created_at", "DESC")
+        .getRawOne();
 
     return {
         ...result,
@@ -22,7 +43,8 @@ export const createCampaign = async (input: DeepPartial<Campaign>): Promise<any>
 export const getCampaignList = async () => {
     let result: any[] = [];
 
-    result = await campaignRepo.createQueryBuilder("camp")
+    result = await campaignRepo
+        .createQueryBuilder("camp")
         .select("camp.id", "id")
         .addSelect("camp.name", "name")
         .addSelect("camp.start_date", "start_date")
