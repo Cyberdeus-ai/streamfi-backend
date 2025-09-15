@@ -88,14 +88,15 @@ export const fillQuoteListHandler = async (tweetList: any[], engagerList: any[])
                     });
                     continuation_token = res.continuation_token;
                 } else continuation_token = post.quote_id;
-                while (1) {
-                    res = await getQuotesContinuationByTweetId(post.tweet_id, continuation_token);
-                    continuation_token = res.continuation_token;
-                    if (res.results === undefined || res.results?.length < 1) break;
+
+                res = await getQuotesContinuationByTweetId(post.tweet_id, continuation_token);
+                continuation_token = res.continuation_token;
+                if (res.results !== undefined || res.results?.length > 0) {
                     res.results?.forEach((item: any) => {
                         list.push(item);
                     });
                 }
+
                 await updateContinuation(post.id, { quote_id: continuation_token });
                 return list.filter((item: any) => {
                     return engagerList.findIndex((engager) => {
@@ -142,14 +143,15 @@ export const fillReplyListHandler = async (tweetList: any[], engagerList: any[])
                     });
                     continuation_token = res.continuation_token;
                 } else continuation_token = post.reply_id;
-                while (1) {
-                    res = await getRepliesContinuationByTweetId(post.tweet_id, continuation_token);
-                    continuation_token = res.continuation_token;
-                    if (res.replies === undefined || res.replies?.length < 1) break;
-                    res.replies.forEach((item: any) => {
+
+                res = await getRepliesContinuationByTweetId(post.tweet_id, continuation_token);
+                continuation_token = res.continuation_token;
+                if (res.replies !== undefined || res.replies?.length > 0) {
+                    res.replies?.forEach((item: any) => {
                         list.push(item);
                     });
                 }
+
                 await updateContinuation(post.id, { reply_id: continuation_token });
                 return list.filter((item: any) => {
                     return engagerList.findIndex((engager) => {
@@ -196,14 +198,15 @@ export const fillRetweetListHandler = async (tweetList: any[], engagerList: any[
                     });
                     continuation_token = res.continuation_token;
                 } else continuation_token = post.retweet_id;
-                while (1) {
-                    res = await getRetweetsContinuationByTweetId(post.tweet_id, continuation_token);
-                    continuation_token = res.continuation_token;
-                    if (res.retweets === undefined || res.retweets?.length < 1) return [];
+
+                res = await getRetweetsContinuationByTweetId(post.tweet_id, continuation_token);
+                continuation_token = res.continuation_token;
+                if (res.retweets !== undefined || res.retweets?.length > 0) {
                     res.retweets.forEach((item: any) => {
                         list.push(item);
                     });
                 }
+
                 await updateContinuation(post.id, { retweet_id: continuation_token });
                 return list.filter((item: any) => {
                     return engagerList.findIndex((engager) => {
@@ -250,8 +253,8 @@ function botDetection(postList: any[]) {
         userPostList.push(post);
     });
 
-    updateOversightList(badUserList.map((user: number) => ({ 
-        id: user, 
-        bot_detection: "high_frequency" 
+    updateOversightList(badUserList.map((user: number) => ({
+        id: user,
+        bot_detection: "high_frequency"
     })), "bot_detection");
 }

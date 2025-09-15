@@ -76,11 +76,12 @@ export const signUpHandler = async (req: Request, res: Response, _next: NextFunc
 
         const twitterAccount = await getTwitterAccount(req.body.twitterAccount);
 
+        const sameIp = await findUserByCondition({ ip_address: req.ip });
+
         const user = await saveUser({
             wallet_address: req.body.address,
+            ip_address: req.ip
         });
-
-        const sameIp = await findUserByCondition({ ip_address: req.ip });
 
         if (sameIp) {
             await saveOversight({
@@ -90,6 +91,8 @@ export const signUpHandler = async (req: Request, res: Response, _next: NextFunc
         } else {
             await saveOversight({ user: { id: user.id } });
         }
+
+        console.log(twitterAccount);
 
         if (twitterAccount?.user_id) {
             saveProfile({
