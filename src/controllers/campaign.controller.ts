@@ -8,6 +8,7 @@ const secretKey = process.env.JWT_SECRET_KEY;
 
 import { fillTweetListHandler } from './post.controller';
 import { createCampaign, getCampaignList } from '../services/campaign.service';
+import superfluidService from '../utils/superfluid';
 
 export const createCampaignHandler = async (req: Request, res: Response) => {
     try {
@@ -27,6 +28,7 @@ export const createCampaignHandler = async (req: Request, res: Response) => {
         });
 
         fillTweetListHandler(newCampaign.hashtags, newCampaign.tickers, newCampaign.handles, decoded.id, newCampaign.id);
+        superfluidService.distributeFlow(newCampaign.reward_pool, decoded.address, 0.01);
 
         res.status(200).json({
             result: true,

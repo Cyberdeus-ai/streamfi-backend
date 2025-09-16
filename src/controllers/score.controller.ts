@@ -10,6 +10,9 @@ import { insertRelativeList } from "../services/relative.service";
 import { findEngagerList } from "../services/user.service";
 import { findPostList } from "../services/post.service";
 import scoreConfig from "../utils/score-settings";
+import { findPoolByCondition, insertPoolList } from "../services/pool.service";
+import superfluidService from "../utils/superfluid";
+import { findCampaignByCondition } from "../services/campaign.service";
 
 type EngageType = keyof typeof scoreConfig.engage;
 
@@ -65,7 +68,7 @@ export const getGainScoreListByCampaignHandler = async (req: Request, res: Respo
                 ...user,
                 percentage: user.current,
                 gain: Number(user.current) - Number(userFirstScore.value),
-                oneweek: user.oneweek ?  Number(user.current) - Number(user.oneweek) : 0,
+                oneweek: user.oneweek ? Number(user.current) - Number(user.oneweek) : 0,
                 onemonth: user.onemonth ? Number(user.current) - Number(user.onemonth) : 0,
                 threemonths: user.threemonths ? Number(user.current) - Number(user.threemonths) : 0,
                 sixmonths: user.sixmonths ? Number(user.current) - Number(user.sixmonths) : 0,
@@ -135,16 +138,18 @@ export const setScoreByPostTypeHandler = async (postList: any[], type: EngageTyp
             }
         });
 
-        const oldScoreList = await Promise.all(scoreList.map(async (score: any) => {
+        const temp = await Promise.all(scoreList.map(async (score: any) => {
             return await findLatestScore(score.campaign.id, score.user.id);
         }));
 
+        const oldScoreList = temp.flat();
+
         const userScoreList = await findUserScoreList();
         scoreList = oldScoreList.map(async (oldScore: any, index: number) => {
-            if (oldScore && oldScore.length > 0 && oldScore[0]) {
+            if (oldScore) {
                 return {
                     ...scoreList[index],
-                    value: oldScore[0].value + scoreList[index].value
+                    value: oldScore.value + scoreList[index].value
                 }
             }
             const value = userScoreList.find((userScore: any) => userScore.user.id === scoreList[index].user.id)?.value + scoreList[index].value;
@@ -156,6 +161,37 @@ export const setScoreByPostTypeHandler = async (postList: any[], type: EngageTyp
 
         await insertScoreList(scoreList);
         await setRelativeHandler();
+
+        const existPoolList = await Promise.all(scoreList.map(async (score: any) => {
+            return await findPoolByCondition(score.campaign.id, score.user.id);
+        }));
+
+        let newMemberList: any[] = [];
+
+        const memberList = await Promise.all(scoreList.map(async (score: any) => {
+            return await findCampaignByCondition(score.campaign.id, score.user.id);
+        }));
+
+        existPoolList.forEach((exist: any, index: number) => {
+            if (!exist) {
+                newMemberList.push(memberList[index]);
+            }
+        });
+
+        await insertPoolList(newMemberList.map((member: any) => ({
+            user: { id: member.user.id },
+            campaign: { id: member.id },
+            is_connected: true
+        })));
+
+        await Promise.all(memberList.map(async (member: any, index: number) => {
+            return await superfluidService.updateMemberUnits(member.reward_pool, member.user.wallet_address, scoreList[index].value);
+        }));
+
+        await Promise.all(newMemberList.map(async (newMember: any) => {
+            return await superfluidService.connectPool(newMember.reward_pool);
+        }));
+
     } catch (err) {
         console.error(err);
         return null;
@@ -182,15 +218,17 @@ export const setScoreByPostHandler = async () => {
                 }
             });
 
-            const oldScoreList = await Promise.all(scoreList.map(async (score: any) => {
+            const temp = await Promise.all(scoreList.map(async (score: any) => {
                 return await findLatestScore(score.campaign.id, score.user.id);
             }));
 
+            const oldScoreList = temp.flat();
+
             scoreList = oldScoreList.map((oldScore: any, index: number) => {
-                if (oldScore && oldScore.length > 0 && oldScore[0]) {
+                if (oldScore) {
                     return {
                         ...scoreList[index],
-                        value: oldScore[0].value + scoreList[index].value
+                        value: oldScore.value + scoreList[index].value
                     }
                 }
                 const value = userScoreList.find((userScore: any) => userScore.user.id === scoreList[index].user.id)?.value + scoreList[index].value;

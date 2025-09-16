@@ -64,10 +64,13 @@ export const fillTweetListHandler = async (hashtags: string[], tickers: string[]
 
         const postList = postListArrays.flat();
         if (postList && postList.length > 0) {
-            const resPostList = await insertPostList(postList);
+            let list: any[] = [];
+            const res = await insertPostList(postList);
+            list.push(res);
+            const resPostList = list.flat();
             await insertContinuationList(resPostList.map((post: any) => {
                 return { post: { id: post.id } };
-            }))
+            }));
         }
     } catch (err) {
         console.error(err);

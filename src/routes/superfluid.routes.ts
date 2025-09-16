@@ -8,24 +8,22 @@ import {
     getSuperFluidBalanceHandler,
     getSuperFluidHealthHandler,
     getSuperFluidInfoHandler,
-    setStreamBasedOnScore,
+    setStreamHandler,
     updatePoolMemberUnitsHandler,
-    distributeInstantHandler,
-    createFlowIntoPoolHandler,
-    updateFlowIntoPoolHandler,
-    deleteFlowIntoPoolHandler,
+    distributeFlowHandler,
+    connectPoolHandler,
+    disconnectPoolHandler
 } from "../controllers/superfluid.controller";
 
-router.post('/stream-based-on-score', tokenValidation, setStreamBasedOnScore);
+router.post('/stream', tokenValidation, setStreamHandler);
 router.get('/superfluid-health', tokenValidation, getSuperFluidHealthHandler);
 router.get('/stream-info/:userAddress', tokenValidation, getSuperFluidInfoHandler);
 router.get('/superfluid-balance', tokenValidation, getSuperFluidBalanceHandler);
 router.delete('/stream/:userAddress', tokenValidation, deleteStreamHandler);
 
 router.post('/pool/:poolAddress/member-units', tokenValidation, updatePoolMemberUnitsHandler);
-router.post('/pool/:poolAddress/distribute', tokenValidation, distributeInstantHandler);
-router.post('/pool/:poolAddress/flow', tokenValidation, createFlowIntoPoolHandler);
-router.patch('/pool/:poolAddress/flow', tokenValidation, updateFlowIntoPoolHandler);
-router.delete('/pool/:poolAddress/flow', tokenValidation, deleteFlowIntoPoolHandler);
+router.post('/pool/:poolAddress/distribute-flow', tokenValidation, distributeFlowHandler);
+router.get('/pool/connect/:memberAddress', tokenValidation, connectPoolHandler);
+router.get('/pool/disconnect/:memberAddress', tokenValidation, disconnectPoolHandler);
 
 export default router;

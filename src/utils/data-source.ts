@@ -1,6 +1,6 @@
 import 'reflect-metadata';
 import { DataSource } from 'typeorm';
-import { User, Campaign, Post, Score, XAccount, Continuation, Oversight, Relative } from '../entities';
+import { User, Campaign, Post, Score, XAccount, Continuation, Oversight, Relative, Pool } from '../entities';
 require("dotenv").config();
 
 export const AppDataSource = new DataSource({
@@ -12,7 +12,7 @@ export const AppDataSource = new DataSource({
     database: process.env.DB_NAME,
     synchronize: true,
     logging: true,
-    entities: [User, Campaign, Post, Score, XAccount, Continuation, Oversight, Relative],
+    entities: [User, Campaign, Post, Score, XAccount, Continuation, Oversight, Relative, Pool],
     migrations: [],
     subscribers: [],
 });

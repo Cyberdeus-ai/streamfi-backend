@@ -7,6 +7,7 @@ import { Score } from "./score.entity";
 import { XAccount } from "./xaccount.entity";
 import { Oversight } from "./oversight.entity";
 import { Relative } from "./relative.entity";
+import { Pool } from "./pool.entity";
 
 @Entity()
 export class User extends Model
@@ -33,7 +34,10 @@ export class User extends Model
     scores: Score[];
 
     @OneToMany(() => Relative, (relative) => relative)
-    relatives: Relative[]
+    relatives: Relative[];
+
+    @OneToMany(() => Pool, (pool) => pool.user)
+    pools: Pool[];
 
     @OneToOne(() => Oversight, (oversight) => oversight.user)
     oversight: Oversight;

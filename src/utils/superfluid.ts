@@ -1,11 +1,13 @@
+import { superTokenAddress } from "./constants";
+
 const { Framework } = require("@superfluid-finance/sdk-core");
 const { ethers } = require("ethers");
 require("dotenv").config();
 
-const { GDAv1Forwarder } = require("./constants");
+const { GDAv1ForwarderAddress, GDAv1ForwarderABI } = require("./constants");
 
-const forwarderAddress = "0x6DA13Bde224A05a288748d857b9e7DDEffd1dE08";
-const forwarderABI = GDAv1Forwarder;
+const forwarderAddress = GDAv1ForwarderAddress;
+const forwarderABI = GDAv1ForwarderABI;
 
 interface FlowInfo {
     flowRate: string;
@@ -53,8 +55,8 @@ class SuperfluidService {
         }
     }
 
-    private calculateFlowRate(activityScore: number): string {
-        const tokensPerSecond = Math.round(activityScore * 1e18 / 10000 / 2629746);
+    private calculateFlowRate(amount: number): string {
+        const tokensPerSecond = Math.round(amount * 1e18 / 10000 / 2629746);
         return (tokensPerSecond).toString();
     }
 
@@ -85,9 +87,9 @@ class SuperfluidService {
         }
     }
 
-    async createStream(receiver: string, activityScore: number): Promise<any> {
+    async createStream(receiver: string, amount: number): Promise<any> {
         this.ensureInitialized();
-        const flowRate = this.calculateFlowRate(activityScore);
+        const flowRate = this.calculateFlowRate(amount);
 
         try {
             const sender = await this.signer.getAddress();
@@ -119,9 +121,9 @@ class SuperfluidService {
         }
     }
 
-    async updateStream(receiver: string, activityScore: number): Promise<any> {
+    async updateStream(receiver: string, amount: number): Promise<any> {
         this.ensureInitialized();
-        const flowRate = this.calculateFlowRate(activityScore);
+        const flowRate = this.calculateFlowRate(amount);
 
         console.log(flowRate);
 
@@ -214,15 +216,49 @@ class SuperfluidService {
         }
     }
 
-    async updateMemberUnits(poolAddress: string, member: string, units: string | number) {
+    async checkPoolBalance(poolAddress: string, superTokenAddress: string) {
+        const provider = new ethers.providers.JsonRpcProvider(process.env.SEPOLIA_RPC_URL);
+        const sf = await Framework.create({
+            chainId: 11155111,
+            provider: provider
+        });
+
+        const superToken = await sf.loadSuperToken(superTokenAddress);
+
+        const poolBalance = await superToken.balanceOf({
+            account: poolAddress,
+            providerOrSigner: provider
+        });
+
+        console.log("Pool balance:", ethers.utils.formatUnits(poolBalance, 18));
+        return ethers.utils.formatUnits(poolBalance, 18);
+    }
+
+    async checkPoolInflows(poolAddress: string, superTokenAddress: string) {
+        const provider = new ethers.providers.JsonRpcProvider(process.env.SEPOLIA_RPC_URL);
+        const sf = await Framework.create({
+            chainId: 11155111,
+            provider: provider
+        });
+
+        const flows = await sf.query.listStreams({
+            receiver: poolAddress.toLowerCase(),
+            token: superTokenAddress.toLowerCase(),
+        });
+
+        console.log("Flows into pool:", flows.items);
+        return flows.items;
+    }
+
+    async updateMemberUnits(poolAddress: string, memberAddress: string, newUnits: string | number) {
         this.ensureInitialized();
         try {
             const contract = new ethers.Contract(forwarderAddress, forwarderABI, this.signer);
 
             const tx = await contract.updateMemberUnits(
                 poolAddress,
-                member,
-                units,
+                memberAddress,
+                newUnits,
                 "0x"
             );
             await tx.wait();
@@ -237,100 +273,60 @@ class SuperfluidService {
         }
     }
 
-    async distributeInstant(superTokenAddress: string, adminAddress: string,  poolAddress: string, amount: string | number) {
+    async distributeFlow(poolAddress: string, senderAddress: string, flowRate: number) {
         this.ensureInitialized();
         try {
-            const contract = new ethers.Contract(
-                forwarderAddress,
-                forwarderABI,
-                this.signer
-            );
+            const contract = new ethers.Contract(forwarderAddress, forwarderABI, this.signer);
+            const flowRateWeiPerSecond = this.calculateFlowRate(flowRate);
 
-            const amountEther = ethers.utils.parseEther(amount);
+            console.log(flowRateWeiPerSecond);
 
-            const tx = await contract.distribute(
+            const tx = await contract.distributeFlow(
                 superTokenAddress,
-                adminAddress,
+                senderAddress,
                 poolAddress,
-                amountEther,
+                flowRateWeiPerSecond,
                 "0x"
             );
-            await tx.wait();
-            
-            console.log(`✅ Distributed ${amountEther} to pool ${poolAddress}`);
-            return { tx, amountEther };
-        } catch (error) {
-            console.error("❌ Error distributing to pool:", error);
-            throw error;
-        }
-    }
 
-    async createFlowIntoPool(poolAddress: string, params: { activityScore?: number; flowRateWeiPerSec?: string; }): Promise<{ txn: any; flowRate: string; }> {
-        this.ensureInitialized();
-        try {
-            let flowRate: string;
-            if (params.flowRateWeiPerSec) {
-                flowRate = params.flowRateWeiPerSec;
-            } else if (typeof params.activityScore === 'number') {
-                flowRate = this.calculateFlowRate(params.activityScore);
-            } else {
-                throw new Error("Provide either flowRateWeiPerSec or activityScore");
-            }
-            const op = this.sf.poolV1.createFlowIntoPool({
-                poolAddress,
-                superToken: this.superToken.address,
-                flowRate,
-            });
-            const txn = await op.exec(this.signer);
-            await txn.wait();
-            console.log(`✅ Created stream into pool ${poolAddress} with flowRate ${flowRate}`);
-            return { txn, flowRate };
+            await tx.wait();
+
+            return true;
         } catch (error) {
             console.error("❌ Error creating stream into pool:", error);
             throw error;
         }
     }
 
-    async updateFlowIntoPool(poolAddress: string, params: { activityScore?: number; flowRateWeiPerSec?: string; }): Promise<{ txn: any; flowRate: string; }> {
+    async connectPool(poolAddress: string) {
         this.ensureInitialized();
         try {
-            let flowRate: string;
-            if (params.flowRateWeiPerSec) {
-                flowRate = params.flowRateWeiPerSec;
-            } else if (typeof params.activityScore === 'number') {
-                flowRate = this.calculateFlowRate(params.activityScore);
-            } else {
-                throw new Error("Provide either flowRateWeiPerSec or activityScore");
-            }
-            const op = this.sf.poolV1.updateFlowIntoPool({
-                poolAddress,
-                superToken: this.superToken.address,
-                flowRate,
-            });
-            const txn = await op.exec(this.signer);
-            await txn.wait();
-            console.log(`✅ Updated stream into pool ${poolAddress} with flowRate ${flowRate}`);
-            return { txn, flowRate };
-        } catch (error) {
-            console.error("❌ Error updating stream into pool:", error);
-            throw error;
+            const contract = new ethers.Contract(forwarderAddress, forwarderABI, this.signer);
+
+            const tx = await contract.connectPool(poolAddress, "0x");
+            const receipt = await tx.wait();
+
+            console.log("Successfully connected to pool: ", receipt);
+            return receipt.status === 1;
+        } catch (err) {
+            console.error("Error connecting to pool:", err);
+            return false;
         }
     }
 
-    async deleteFlowIntoPool(poolAddress: string): Promise<{ txn: any; }> {
+    async disconnectPool(poolAddress: string) {
         this.ensureInitialized();
         try {
-            const op = this.sf.poolV1.deleteFlowIntoPool({
-                poolAddress,
-                superToken: this.superToken.address,
-            });
-            const txn = await op.exec(this.signer);
-            await txn.wait();
-            console.log(`✅ Deleted stream into pool ${poolAddress}`);
-            return { txn };
-        } catch (error) {
-            console.error("❌ Error deleting stream into pool:", error);
-            throw error;
+            const contract = new ethers.Contract(forwarderAddress, forwarderABI, this.signer);
+
+            const tx = await contract.disconnectPool(poolAddress, "0x");
+            const receipt = await tx.wait();
+
+            console.log("Successfully disconnected from pool: ", receipt);
+            return receipt.status === 1;
+        } catch (err) {
+            console.error("Error connecting to pool:", err);
+            return false;
         }
     }
 }

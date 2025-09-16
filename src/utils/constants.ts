@@ -1,4 +1,6 @@
-export const GDAv1Forwarder = [
+export const GDAv1ForwarderAddress = "0x6DA13Bde224A05a288748d857b9e7DDEffd1dE08";
+
+export const GDAv1ForwarderABI = [
     {
         "inputs": [
             {
@@ -294,3 +296,5 @@ export const GDAv1Forwarder = [
         "type": "function"
     }
 ];
+
+export const superTokenAddress = "0x30a6933Ca9230361972E413a15dC8114c952414e";

@@ -5,6 +5,7 @@ import { User } from './user.entity';
 import { Post } from './post.entity';
 import { Score } from './score.entity';
 import { Relative } from './relative.entity';
+import { Pool } from './pool.entity';
 
 @Entity()
 export class Campaign extends Model
@@ -41,6 +42,9 @@ export class Campaign extends Model
 
     @OneToMany(() => Relative, (relative) => relative.campaign)
     relatives: Relative[]
+
+    @OneToMany(() => Pool, (pool) => pool.campaign)
+    pools: Pool[];
 
     @ManyToOne(() => User, (user) => user.campaigns)
     @JoinColumn({ name: "user_id" })

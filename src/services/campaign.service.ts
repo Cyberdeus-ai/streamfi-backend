@@ -112,3 +112,19 @@ export const findCampaignListByUser = async (userId: number) => {
 
     return result;
 }
+
+export const findCampaignByCondition = async (campaignId: number, userId: number) => {
+    let result: any = null;
+
+    result = await campaignRepo.findOne({
+        where: {
+            id: campaignId,
+            user: {
+                id: userId
+            }
+        },
+        relations: ["user"]
+    });
+
+    return result;
+}
