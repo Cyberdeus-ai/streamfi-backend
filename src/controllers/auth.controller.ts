@@ -202,7 +202,7 @@ export const signInWithTokenHandler = async (req: Request, res: Response, _next:
         const newToken = jwt.sign(payload, secretKey, options);
 
         const profile = await findProfileByCondition({
-            user: user.id
+            user: { id: user.id }
         });
 
         const campaignCount = await findCampaignCountByUser(user.id);
