@@ -14,20 +14,9 @@ export const getCampaignListByUserHandler = async (req: Request, res: Response) 
 
         const campaignList = await findCampaignListByUser(decoded.id);
 
-        const balanceList = await Promise.all(campaignList.map(async (campaign: any) => {
-            return await superfluidService.checkPoolBalance(campaign.reward_pool, superTokenAddress);
-        }));
-
-        const rewardList = campaignList.map((campaign: any, index: number) => {
-            return {
-                ...campaign,
-                balance: balanceList[index]
-            };
-        });
-
         res.status(200).json({
             result: true,
-            rewardList
+            campaignList
         });
     } catch (err) {
         console.error(err);
