@@ -72,6 +72,22 @@ export const findLatestScore = async (campaignId: number, userId: number) => {
     return result.length > 0 ? result[0] : null;
 }
 
+export const findLatestScoreListByCampaign = async (campaignId: number) => {
+    let result: any = null;
+
+    result = await scoreRepo.query(
+        `SELECT DISTINCT ON (s.user_id)
+            s.user_id,
+            s.value
+         FROM score s
+         WHERE s.campaign_id = $1
+         ORDER BY s.user_id, s.updated_at DESC`,
+        [campaignId]
+    );
+
+    return result;
+}
+
 export const findLatestScoreList = async () => {
     let result: any = null;
 

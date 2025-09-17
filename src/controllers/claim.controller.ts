@@ -4,6 +4,7 @@ import { findUserList } from "../services/user.service";
 import { findCampaignListByUser } from "../services/campaign.service";
 import superfluidService from "../utils/superfluid";
 import { superTokenAddress } from "../utils/constants";
+import { findRelativeByCampaign } from "../services/relative.service";
 
 require('dotenv').config();
 
@@ -13,15 +14,26 @@ export const getCampaignListByUserHandler = async (req: Request, res: Response) 
         const decoded = jwt.verify(token, process.env.JWT_SECRET_KEY);
 
         const campaignList = await findCampaignListByUser(decoded.id);
+        const idList = campaignList.map((campaign: any) => {
+            return campaign.id;
+        });
+
+        const percentageList = await findRelativeByCampaign(idList, decoded.id);
 
         const balanceList = await Promise.all(campaignList.map(async (campaign: any) => {
             return await superfluidService.checkPoolBalance(campaign.reward_pool, superTokenAddress);
         }));
 
+        const flowRateList = await Promise.all(campaignList.map(async (campaign: any) => {
+            return await superfluidService.checkPoolInflows(campaign.reward_pool, superTokenAddress);
+        }))
+
         const rewardList = campaignList.map((campaign: any, index: number) => {
             return {
                 ...campaign,
-                balance: balanceList[index]
+                balance: balanceList[index],
+                flowRate: flowRateList[index][0],
+                percentage: percentageList[index].value
             };
         });
 

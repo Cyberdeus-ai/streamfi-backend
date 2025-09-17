@@ -1,5 +1,6 @@
 import { AppDataSource } from "../utils/data-source";
 import { Relative } from "../entities";
+import { In } from "typeorm";
 
 const relativeRepo = AppDataSource.getRepository(Relative);
 
@@ -88,6 +89,23 @@ export const findScoreListByCondition = async (fromDate: Date, campaignId: numbe
         ORDER BY
             max_value DESC;
     `, [fromDate, campaignId]);
+
+    return result;
+}
+
+export const findRelativeByCampaign = async (idList: any[], userId: number) => {
+    let result: any = null;
+
+    result = await relativeRepo.find({
+        where: {
+            user: {
+                id: userId
+            },
+            campaign: {
+                id: In(idList)
+            }
+        }
+    });
 
     return result;
 }
