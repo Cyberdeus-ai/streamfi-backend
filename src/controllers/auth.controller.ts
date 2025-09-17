@@ -174,7 +174,7 @@ export const signInHandler = async (req: Request, res: Response, _next: NextFunc
         res.status(200).json({
             result: true,
             token: token,
-            user: { ...profile, campaignCount: campaignCount }
+            user: { ...profile, campaignCount: campaignCount, accountType: user.account_type }
         });
     } catch (err) {
         console.error(err);
@@ -210,7 +210,7 @@ export const signInWithTokenHandler = async (req: Request, res: Response, _next:
         res.status(200).json({
             result: true,
             token: newToken,
-            user: { ...profile, campaignCount: campaignCount }
+            user: { ...profile, campaignCount: campaignCount, accountType: user.account_type }
         });
     } catch (err) {
         console.error(err);

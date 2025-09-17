@@ -10,9 +10,8 @@ import { insertRelativeList } from "../services/relative.service";
 import { findEngagerList } from "../services/user.service";
 import { findPostList } from "../services/post.service";
 import scoreConfig from "../utils/score-settings";
-import { findPoolByCondition, insertPoolList } from "../services/pool.service";
 import superfluidService from "../utils/superfluid";
-import { findCampaignByCondition } from "../services/campaign.service";
+import { findPostByCondition } from "../services/post.service";
 
 type EngageType = keyof typeof scoreConfig.engage;
 
@@ -122,17 +121,17 @@ export const setScoreByAccountHandler = async () => {
     }
 }
 
-export const setScoreByPostTypeHandler = async (postList: any[], type: EngageType) => {
+export const setScoreByPostTypeHandler = async (postList: any[]) => {
     try {
         let scoreList: any[] = [];
         postList.forEach((post: any) => {
             const index = scoreList.findIndex((score: any) => score.user.id === post.user.id);
             if (index > -1) {
-                scoreList[index].value += Number(scoreConfig.engage[type]);
+                scoreList[index].value += Number(scoreConfig.engage[post.type as EngageType]);
             } else {
                 scoreList.push({
                     user: { id: post.user.id },
-                    value: Number(scoreConfig.engage[type]),
+                    value: Number(scoreConfig.engage[post.type as EngageType]),
                     campaign: { id: post.campaign.id }
                 });
             }
@@ -145,7 +144,8 @@ export const setScoreByPostTypeHandler = async (postList: any[], type: EngageTyp
         const oldScoreList = temp.flat();
 
         const userScoreList = await findUserScoreList();
-        scoreList = oldScoreList.map(async (oldScore: any, index: number) => {
+
+        scoreList = oldScoreList.map((oldScore: any, index: number) => {
             if (oldScore) {
                 return {
                     ...scoreList[index],
@@ -162,34 +162,12 @@ export const setScoreByPostTypeHandler = async (postList: any[], type: EngageTyp
         await insertScoreList(scoreList);
         await setRelativeHandler();
 
-        const existPoolList = await Promise.all(scoreList.map(async (score: any) => {
-            return await findPoolByCondition(score.campaign.id, score.user.id);
-        }));
-
-        let newMemberList: any[] = [];
-
         const memberList = await Promise.all(scoreList.map(async (score: any) => {
-            return await findCampaignByCondition(score.campaign.id, score.user.id);
+            return await findPostByCondition(score.campaign.id, score.user.id);
         }));
-
-        existPoolList.forEach((exist: any, index: number) => {
-            if (!exist) {
-                newMemberList.push(memberList[index]);
-            }
-        });
-
-        await insertPoolList(newMemberList.map((member: any) => ({
-            user: { id: member.user.id },
-            campaign: { id: member.id },
-            is_connected: true
-        })));
 
         await Promise.all(memberList.map(async (member: any, index: number) => {
-            return await superfluidService.updateMemberUnits(member.reward_pool, member.user.wallet_address, scoreList[index].value);
-        }));
-
-        await Promise.all(newMemberList.map(async (newMember: any) => {
-            return await superfluidService.connectPool(newMember.reward_pool);
+            return await superfluidService.updateMemberUnits(member.campaign.reward_pool, member.user.wallet_address, scoreList[index].value);
         }));
 
     } catch (err) {

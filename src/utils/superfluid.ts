@@ -250,7 +250,7 @@ class SuperfluidService {
         return flows.items;
     }
 
-    async updateMemberUnits(poolAddress: string, memberAddress: string, newUnits: string | number) {
+    async updateMemberUnits(poolAddress: string, memberAddress: string, newUnits: string | number) {  
         this.ensureInitialized();
         try {
             const contract = new ethers.Contract(forwarderAddress, forwarderABI, this.signer);
@@ -263,10 +263,7 @@ class SuperfluidService {
             );
             await tx.wait();
 
-            console.log(tx);
-
             return tx;
-
         } catch (error) {
             console.error("❌ Error updating member units:", error);
             throw error;
@@ -278,8 +275,6 @@ class SuperfluidService {
         try {
             const contract = new ethers.Contract(forwarderAddress, forwarderABI, this.signer);
             const flowRateWeiPerSecond = this.calculateFlowRate(flowRate);
-
-            console.log(flowRateWeiPerSecond);
 
             const tx = await contract.distributeFlow(
                 superTokenAddress,

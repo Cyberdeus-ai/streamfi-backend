@@ -28,7 +28,7 @@ export const createCampaignHandler = async (req: Request, res: Response) => {
         });
 
         fillTweetListHandler(newCampaign.hashtags, newCampaign.tickers, newCampaign.handles, decoded.id, newCampaign.id);
-        superfluidService.distributeFlow(newCampaign.reward_pool, decoded.address, 0.01);
+        superfluidService.createStream(newCampaign.reward_pool, 0.01);
 
         res.status(200).json({
             result: true,

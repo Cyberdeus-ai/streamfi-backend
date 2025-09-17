@@ -69,7 +69,7 @@ export const findLatestScore = async (campaignId: number, userId: number) => {
         [campaignId, userId]
     );
 
-    return result;
+    return result.length > 0 ? result[0] : null;
 }
 
 export const findLatestScoreList = async () => {

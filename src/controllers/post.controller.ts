@@ -1,6 +1,7 @@
 import moment from 'moment';
+import { Request, Response } from 'express';
 import { setScoreByPostTypeHandler } from './score.controller';
-import { findTweetList, insertPostList, findCampaignByPost } from '../services/post.service';
+import { findTweetList, insertPostList } from '../services/post.service';
 import {
     getQuotesByTweetId,
     getQuotesContinuationByTweetId,
@@ -13,6 +14,8 @@ import {
 } from '../utils/scraper';
 import { insertContinuationList, updateContinuation } from '../services/continuation.service';
 import { updateOversightList } from '../services/oversight.service';
+
+import { getEngagerListHandler } from './user.controller';
 
 export const getTweetListHandler = async () => {
     try {
@@ -102,7 +105,7 @@ export const fillQuoteListHandler = async (tweetList: any[], engagerList: any[])
 
                 await updateContinuation(post.id, { quote_id: continuation_token });
                 return list.filter((item: any) => {
-                    return engagerList.findIndex((engager) => {
+                    return engagerList.findIndex((engager: any) => {
                         return engager.xaccount.username === item.user.username
                     }) > -1;
                 })?.map((filtered: any) => {
@@ -111,7 +114,7 @@ export const fillQuoteListHandler = async (tweetList: any[], engagerList: any[])
                         type: 'quote',
                         timestamp: moment(filtered.timestamp * 1000),
                         user: {
-                            id: engagerList.find((engager) => {
+                            id: engagerList.find((engager: any) => {
                                 return engager.xaccount.username === filtered.user.username
                             }).id
                         },
@@ -124,7 +127,7 @@ export const fillQuoteListHandler = async (tweetList: any[], engagerList: any[])
         if (postList && postList.length > 0) {
             botDetection(postList);
             await insertPostList(postList);
-            await setScoreByPostTypeHandler(postList, "quote");
+            await setScoreByPostTypeHandler(postList);
         }
     } catch (err) {
         console.error(err);
@@ -157,7 +160,7 @@ export const fillReplyListHandler = async (tweetList: any[], engagerList: any[])
 
                 await updateContinuation(post.id, { reply_id: continuation_token });
                 return list.filter((item: any) => {
-                    return engagerList.findIndex((engager) => {
+                    return engagerList.findIndex((engager: any) => {
                         return engager.xaccount.username === item.user.username
                     }) > -1;
                 })?.map((filtered: any) => {
@@ -166,7 +169,7 @@ export const fillReplyListHandler = async (tweetList: any[], engagerList: any[])
                         type: 'reply',
                         timestamp: moment(filtered.timestamp * 1000),
                         user: {
-                            id: engagerList.find((engager) => {
+                            id: engagerList.find((engager: any) => {
                                 return engager.xaccount.username === filtered.user.username
                             }).id
                         },
@@ -179,7 +182,7 @@ export const fillReplyListHandler = async (tweetList: any[], engagerList: any[])
         if (postList && postList.length > 0) {
             botDetection(postList);
             await insertPostList(postList);
-            await setScoreByPostTypeHandler(postList, "reply");
+            await setScoreByPostTypeHandler(postList);
         }
     } catch (err) {
         console.error(err);
@@ -212,7 +215,7 @@ export const fillRetweetListHandler = async (tweetList: any[], engagerList: any[
 
                 await updateContinuation(post.id, { retweet_id: continuation_token });
                 return list.filter((item: any) => {
-                    return engagerList.findIndex((engager) => {
+                    return engagerList.findIndex((engager: any) => {
                         return engager.xaccount.username === item.user.username
                     }) > -1;
                 })?.map((filtered: any) => {
@@ -221,7 +224,7 @@ export const fillRetweetListHandler = async (tweetList: any[], engagerList: any[
                         type: 'retweet',
                         timestamp: moment(filtered.timestamp * 1000),
                         user: {
-                            id: engagerList.find((engager) => {
+                            id: engagerList.find((engager: any) => {
                                 return engager.xaccount.username === filtered.user.username
                             }).id
                         },
@@ -234,7 +237,7 @@ export const fillRetweetListHandler = async (tweetList: any[], engagerList: any[
         if (postList && postList.length > 0) {
             botDetection(postList);
             await insertPostList(postList);
-            await setScoreByPostTypeHandler(postList, "retweet");
+            await setScoreByPostTypeHandler(postList);
         }
     } catch (err) {
         console.error(err);
@@ -256,8 +259,42 @@ function botDetection(postList: any[]) {
         userPostList.push(post);
     });
 
-    updateOversightList(badUserList.map((user: number) => ({
-        id: user,
-        bot_detection: "high_frequency"
-    })), "bot_detection");
+    if (badUserList && badUserList.length > 0) {
+        updateOversightList(badUserList.map((user: number) => ({
+            id: user,
+            bot_detection: "high_frequency"
+        })), "bot_detection");
+    }
+}
+
+export const testFunc = async (req: Request, res: Response) => {
+    try {
+        const engagerList = await getEngagerListHandler();
+
+        let postList = [
+            {
+                tweet_id: req.body?.tweet_id,
+                type: req.body.type,
+                timestamp: moment(Number(req.body?.timestamp) * 1000),
+                user: {
+                    id: engagerList.find((engager: any) => {
+                        return engager.xaccount.username === req.body?.username
+                    }).id
+                },
+                campaign: { id: Number(req.body?.campaign_id) }
+            }
+        ]
+
+        botDetection(postList);
+        await insertPostList(postList);
+        await setScoreByPostTypeHandler(postList);
+
+        res.status(200).json({
+            result: true,
+            message: "Update successfully!"
+        })
+    } catch (err) {
+        console.error(err);
+        res.status(500).send(err);
+    }
 }

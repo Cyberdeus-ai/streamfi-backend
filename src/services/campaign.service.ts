@@ -1,4 +1,4 @@
-import { DeepPartial } from "typeorm";
+import { DeepPartial, In } from "typeorm";
 
 import { AppDataSource } from "../utils/data-source";
 import { Campaign, Post, XAccount } from "../entities";
@@ -109,22 +109,6 @@ export const findCampaignListByUser = async (userId: number) => {
             and post.type != 'tweet'
             group by post.user_id, campaign.id;
         `, [userId]);
-
-    return result;
-}
-
-export const findCampaignByCondition = async (campaignId: number, userId: number) => {
-    let result: any = null;
-
-    result = await campaignRepo.findOne({
-        where: {
-            id: campaignId,
-            user: {
-                id: userId
-            }
-        },
-        relations: ["user"]
-    });
 
     return result;
 }

@@ -86,3 +86,19 @@ export const findTweetList = async () => {
 
 	return result;
 }
+
+export const findPostByCondition = async (campaignId: number, userId: number) => {
+    let result: any = null;
+
+    result = await postRepo.findOne({
+        where: {
+            campaign: { id: campaignId },
+            user: {
+                id: userId
+            }
+        },
+        relations: ["user", "campaign"]
+    });
+
+    return result;
+}
