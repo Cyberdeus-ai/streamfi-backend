@@ -90,7 +90,6 @@ class SuperfluidService {
     async createStream(receiver: string, amount: number): Promise<any> {
         this.ensureInitialized();
         const flowRate = this.calculateFlowRate(amount);
-
         try {
             const sender = await this.signer.getAddress();
 
@@ -124,9 +123,6 @@ class SuperfluidService {
     async updateStream(receiver: string, amount: number): Promise<any> {
         this.ensureInitialized();
         const flowRate = this.calculateFlowRate(amount);
-
-        console.log(flowRate);
-
         try {
             const sender = await this.signer.getAddress();
 
@@ -160,7 +156,6 @@ class SuperfluidService {
 
     async deleteStream(receiver: string): Promise<any> {
         this.ensureInitialized();
-
         try {
             const sender = await this.signer.getAddress();
 
@@ -267,61 +262,6 @@ class SuperfluidService {
         } catch (error) {
             console.error("❌ Error updating member units:", error);
             throw error;
-        }
-    }
-
-    async distributeFlow(poolAddress: string, senderAddress: string, flowRate: number) {
-        this.ensureInitialized();
-        try {
-            const contract = new ethers.Contract(forwarderAddress, forwarderABI, this.signer);
-            const flowRateWeiPerSecond = this.calculateFlowRate(flowRate);
-
-            const tx = await contract.distributeFlow(
-                superTokenAddress,
-                senderAddress,
-                poolAddress,
-                flowRateWeiPerSecond,
-                "0x"
-            );
-
-            await tx.wait();
-
-            return true;
-        } catch (error) {
-            console.error("❌ Error creating stream into pool:", error);
-            throw error;
-        }
-    }
-
-    async connectPool(poolAddress: string) {
-        this.ensureInitialized();
-        try {
-            const contract = new ethers.Contract(forwarderAddress, forwarderABI, this.signer);
-
-            const tx = await contract.connectPool(poolAddress, "0x");
-            const receipt = await tx.wait();
-
-            console.log("Successfully connected to pool: ", receipt);
-            return receipt.status === 1;
-        } catch (err) {
-            console.error("Error connecting to pool:", err);
-            return false;
-        }
-    }
-
-    async disconnectPool(poolAddress: string) {
-        this.ensureInitialized();
-        try {
-            const contract = new ethers.Contract(forwarderAddress, forwarderABI, this.signer);
-
-            const tx = await contract.disconnectPool(poolAddress, "0x");
-            const receipt = await tx.wait();
-
-            console.log("Successfully disconnected from pool: ", receipt);
-            return receipt.status === 1;
-        } catch (err) {
-            console.error("Error connecting to pool:", err);
-            return false;
         }
     }
 }
