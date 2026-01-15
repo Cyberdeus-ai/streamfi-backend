@@ -1,19 +1,19 @@
 module.exports = {
     apps: [
         {
-            name: 'backend',
-            script: 'npm run dev'
+            name: "backend",
+            script: "npm run dev"
         }
     ],
 
     deploy: {
         production: {
-            user: 'root',
-            host: '84.32.22.56',
-            ref: 'origin/main',
-            repo: 'https://github.com/Cyberdeus-ai/streamfi-backend.git',
-            path: '/root/streamfi-backend',
-            'post-deploy': 'npm install && pm2 startOrRestart ecosystem.config.js --name BACKEND'
-        },
-    },
-};
+            user: "root",
+            host: "84.32.22.56",
+            ref: "origin/main",
+            repo: "https://github.com/Cyberdeus/streamfi-backend.git",
+            path: "/root/streamfi-backend",
+            "post-deploy": "npm install && pm2 startOrRestart ecosystem.config.js --name BACKEND"
+        }
+    }
+}
