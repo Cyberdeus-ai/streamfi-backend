@@ -48,7 +48,7 @@ export const checkSuperTokenHandler = async (req: Request, res: Response, _next:
 
 export const getPoolListHandler = async (req: Request, res: Response, _next: NextFunction) => {
     try {
-        const userId = parseInt(req.params.id);
+        const userId = Number(req.params.userId);
 
         const pools = await findPoolListByUserId(userId);
 
@@ -67,7 +67,7 @@ export const getPoolListHandler = async (req: Request, res: Response, _next: Nex
 
 export const updatePoolHandler = async (req: Request, res: Response, _next: NextFunction) => {
     try {
-        const poolId = parseInt(req.params.id);
+        const poolId = Number(req.params.poolId);
 
         if (isNaN(poolId)) {
             res.status(400).json({

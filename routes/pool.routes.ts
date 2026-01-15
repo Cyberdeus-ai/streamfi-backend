@@ -9,10 +9,10 @@ import {
 
 const router = Router();
 
-router.get('/:id', getPoolListHandler);
+router.get('/:userId', getPoolListHandler);
 router.post('/check', checkSuperTokenHandler);
 router.post('/', createPoolHandler);
-router.put('/:id', updatePoolHandler);
+router.put('/:poolId', updatePoolHandler);
 
 export default router;
 

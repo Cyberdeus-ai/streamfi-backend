@@ -56,7 +56,7 @@ export const getCampaignListHandler = async (req: Request, res: Response, _next:
 
 export const updateCampaignHandler = async (req: Request, res: Response, _next: NextFunction) => {
     try {
-        const campaignId = parseInt(req.params.id);
+        const campaignId = Number(req.params.campaignId);
 
         if (isNaN(campaignId)) {
             res.status(400).json({
@@ -82,7 +82,7 @@ export const updateCampaignHandler = async (req: Request, res: Response, _next: 
 
 export const deleteCampaignHandler = async (req: Request, res: Response, _next: NextFunction) => {
     try {
-        const campaignId = parseInt(req.params.id);
+        const campaignId = Number(req.params.campaignId);
 
         if (isNaN(campaignId)) {
             res.status(400).json({

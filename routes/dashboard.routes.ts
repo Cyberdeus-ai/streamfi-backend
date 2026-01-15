@@ -1,13 +1,13 @@
 import { Router } from 'express'; 
 
 import {
-    getAdminDashboardStatsHandler,
-    getPromoterDashboardStatsHandler
+    getAdminDashboardHandler,
+    getPromoterDashboardHandler
 } from '../controllers/dashboard.controller';
 
 const router = Router();
 
-router.get('/admin/:id', getAdminDashboardStatsHandler);
-router.get('/promoter/:id', getPromoterDashboardStatsHandler);
+router.get('/admin/:userId', getAdminDashboardHandler);
+router.get('/promoter/:userId', getPromoterDashboardHandler);
 
 export default router;

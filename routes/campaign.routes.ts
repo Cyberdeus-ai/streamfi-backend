@@ -11,7 +11,7 @@ const router = Router();
 
 router.get('/', getCampaignListHandler);
 router.post('/', createCampaignHandler);
-router.put('/:id', updateCampaignHandler);
-router.delete('/:id', deleteCampaignHandler);
+router.put('/:campaignId', updateCampaignHandler);
+router.delete('/:campaignId', deleteCampaignHandler);
 
 export default router;

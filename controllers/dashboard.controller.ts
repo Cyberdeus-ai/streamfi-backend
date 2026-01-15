@@ -10,9 +10,9 @@ import { findTopPromoterList } from '../services/user.service';
 import { findJoinListByUserId } from '../services/join.service';
 import { findUserListByCampaignList } from '../services/join.service';
 
-export const getAdminDashboardStatsHandler = async (req: Request, res: Response, _next: NextFunction) => {
+export const getAdminDashboardHandler = async (req: Request, res: Response, _next: NextFunction) => {
     try {
-        const userId = parseInt(req.params.id);
+        const userId = Number(req.params.userId);
 
         if (isNaN(userId)) {
             res.status(400).json({
@@ -64,9 +64,9 @@ export const getAdminDashboardStatsHandler = async (req: Request, res: Response,
     }
 }
 
-export const getPromoterDashboardStatsHandler = async (req: Request, res: Response, _next: NextFunction) => {
+export const getPromoterDashboardHandler = async (req: Request, res: Response, _next: NextFunction) => {
     try {
-        const userId = parseInt(req.params.id);
+        const userId = Number(req.params.userId);
 
         if (isNaN(userId)) {
             res.status(400).json({
