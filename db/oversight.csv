@@ -1,3 +1,0 @@
-id,created_at,updated_at,bot_detection,sockpuppet_filters,wallet_status,is_ban,stream_status,user_id
-1,9/15/2025 2:42,9/15/2025 2:42,high frequency,,TRUE,FALSE,FALSE,18
-2,9/15/2025 2:44,9/15/2025 2:44,,same IP address,FALSE,FALSE,TRUE,23
