@@ -54,6 +54,9 @@ export class Campaign extends Model {
     @Column('text', { array: true })
     big_accounts: string[];
 
+    @Column({ length: 50, nullable: true })
+    web3_social: string;
+
     @Column({ default: 0 })
     promoters: number;
 

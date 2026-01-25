@@ -2,7 +2,7 @@ module.exports = {
     apps: [
         {
             name: "backend",
-            script: "npm run dev"
+            script: "npm run dev:all"
         }
     ],
 
