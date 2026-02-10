@@ -82,7 +82,7 @@ AppDataSource.initialize().then(async () => {
 
     app.use(
         '/graphql',
-        cors<cors.CorsRequest>(),
+        cors(),
         bodyParser.json(),
         expressMiddleware(apolloServer) as any,
     );
