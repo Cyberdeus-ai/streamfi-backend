@@ -28,7 +28,9 @@ function fail(name: string, error: string) {
 
 async function runHttpTests(client: GraphQLClient): Promise<void> {
   try {
-    const introspection = await client.request(gql`
+    const introspection = await client.request<{
+      __schema?: { queryType?: { name?: string }; types?: { name: string }[] };
+    }>(gql`
       query Introspection {
         __schema {
           queryType { name }
@@ -36,10 +38,11 @@ async function runHttpTests(client: GraphQLClient): Promise<void> {
         }
       }
     `);
-    const hasQueryType = introspection?.__schema?.queryType?.name === 'Query';
-    const hasTypes = Array.isArray(introspection?.__schema?.types) && introspection.__schema.types.length > 0;
+    const schema = introspection?.__schema;
+    const hasQueryType = schema?.queryType?.name === 'Query';
+    const hasTypes = Array.isArray(schema?.types) && schema.types.length > 0;
     if (hasQueryType && hasTypes) {
-      pass('GraphQL server reachable and schema valid', `${introspection.__schema.types.length} types`);
+      pass('GraphQL server reachable and schema valid', `${schema.types.length} types`);
     } else {
       fail('Introspection', 'Unexpected introspection response');
     }

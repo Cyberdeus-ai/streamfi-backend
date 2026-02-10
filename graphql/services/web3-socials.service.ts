@@ -357,7 +357,7 @@ const setupFarcasterSubscription = async () => {
                                 );
                             }
                         },
-                        error: (err) => console.error('Farcaster subscription error:', err),
+                        error: (err: unknown) => console.error('Farcaster subscription error:', err),
                         complete: () => console.log('Farcaster subscription completed')
                     }
                 );
@@ -425,7 +425,7 @@ const setupLensSubscription = async () => {
                                 );
                             }
                         },
-                        error: (err) => console.error('Lens subscription error:', err),
+                        error: (err: unknown) => console.error('Lens subscription error:', err),
                         complete: () => console.log('Lens subscription completed')
                     }
                 );
@@ -487,7 +487,7 @@ const setupMindsSubscription = async () => {
                                 );
                             }
                         },
-                        error: (err) => console.error('Minds subscription error:', err),
+                        error: (err: unknown) => console.error('Minds subscription error:', err),
                         complete: () => console.log('Minds subscription completed')
                     }
                 );
