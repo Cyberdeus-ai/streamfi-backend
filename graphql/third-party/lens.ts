@@ -1,6 +1,6 @@
 import { GraphQLClient, gql } from 'graphql-request';
 
-const LENS_API_URL = 'https://api.lens.dev';
+const LENS_API_URL = 'https://api.lens.xyz/graphql';
 
 const SEARCH_PUBLICATIONS = gql`
     query SearchPublications($query: String!, $limit: LimitScalar!) {

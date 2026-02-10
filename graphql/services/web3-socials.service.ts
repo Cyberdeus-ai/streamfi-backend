@@ -2,9 +2,9 @@ import { createClient } from 'graphql-ws';
 import WebSocket from 'ws';
 import { AppDataSource } from '../../utils/data-source';
 import { Campaign, User, Join } from '../../entities';
-import { fetchFarcasterDataByHashtag, fetchFarcasterPostEngagements } from '../../third-party/farcaster';
-import { fetchLensDataByHashtag, fetchLensPostEngagements } from '../../third-party/lens';
-import { searchMindsPosts, fetchMindsPostEngagements } from '../../third-party/minds';
+import { fetchFarcasterDataByHashtag, fetchFarcasterPostEngagements } from '../third-party/farcaster';
+import { fetchLensDataByHashtag, fetchLensPostEngagements } from '../third-party/lens';
+import { searchMindsPosts, fetchMindsPostEngagements } from '../third-party/minds';
 import scoreConfig from '../../utils/score-settings';
 import { pubsub } from '../resolvers';
 import { saveActivity } from '../../services/activity.service';
@@ -370,7 +370,7 @@ const setupFarcasterSubscription = async () => {
 };
 
 const setupLensSubscription = async () => {
-    const LENS_WS_URL = process.env.LENS_WS_URL || 'wss://api.lens.dev';
+    const LENS_WS_URL = process.env.LENS_WS_URL || 'wss://api.lens.xyz/graphql';
     
     try {
         const client = createClient({

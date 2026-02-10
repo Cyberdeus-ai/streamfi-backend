@@ -1,9 +1,9 @@
 import { PubSub } from 'graphql-subscriptions';
 import { AppDataSource } from '../utils/data-source';
 import { Campaign, Join } from '../entities';
-import { fetchFarcasterDataByHashtag, fetchFarcasterPostEngagements } from '../third-party/farcaster';
-import { fetchLensDataByHashtag, fetchLensPostEngagements } from '../third-party/lens';
-import { searchMindsPosts, fetchMindsPostEngagements } from '../third-party/minds';
+import { fetchFarcasterDataByHashtag, fetchFarcasterPostEngagements } from './third-party/farcaster';
+import { fetchLensDataByHashtag, fetchLensPostEngagements } from './third-party/lens';
+import { searchMindsPosts, fetchMindsPostEngagements } from './third-party/minds';
 
 export const pubsub = new PubSub();
 

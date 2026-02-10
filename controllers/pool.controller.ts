@@ -26,7 +26,7 @@ export const createPoolHandler = async (req: Request, res: Response, _next: Next
 export const checkSuperTokenHandler = async (req: Request, res: Response, _next: NextFunction) => {
     try {
         const superTokenAddress = req.body.superTokenAddress;
-        const userId = parseInt(req.body.id);
+        const userId = parseInt(req.body.userId);
         const exist = await findSuperToken(superTokenAddress, userId);
         if (exist) {
             res.status(200).json({

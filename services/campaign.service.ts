@@ -32,7 +32,7 @@ export const findCampaignList = async (page: number = 1, limit: number = 10, sea
 
     const [campaigns, total] = await campaignRepo.findAndCount({
         where: whereCondition,
-        relations: ['pool'],
+        relations: ['pool', 'user'],
         skip: skip,
         take: limit,
         order: {

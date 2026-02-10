@@ -13,7 +13,9 @@
         "dev:graphql": "nodemon --exec ts-node-dev --respawn --transpile-only server-graphql.ts",
         "dev:all": "concurrently \"npm run dev\" \"npm run dev:graphql\"",
         "generate-certs": "node scripts/generate-ssl-certs.js",
-        "setup-certbot": "bash scripts/setup-certbot.sh"
+        "setup-certbot": "bash scripts/setup-certbot.sh",
+        "verify:graphql": "ts-node scripts/verify-graphql-workflow.ts",
+        "verify:thirdparty": "ts-node scripts/verify-third-party-apis.ts"
     },
     "keywords": [
         "superfluid",
