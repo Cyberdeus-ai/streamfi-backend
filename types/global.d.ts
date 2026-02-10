@@ -1,0 +1,10 @@
+declare module 'graphql-subscriptions';
+declare module 'graphql-tag';
+declare module 'graphql-ws';
+declare module 'graphql-ws/lib/use/ws';
+declare module '@apollo/server';
+declare module '@apollo/server/express4';
+declare module '@apollo/server/plugin/drainHttpServer';
+declare module '@graphql-tools/schema';
+declare module 'cors';
+declare module 'ws';

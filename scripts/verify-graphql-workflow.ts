@@ -42,7 +42,7 @@ async function runHttpTests(client: GraphQLClient): Promise<void> {
     const hasQueryType = schema?.queryType?.name === 'Query';
     const hasTypes = Array.isArray(schema?.types) && schema.types.length > 0;
     if (hasQueryType && hasTypes) {
-      pass('GraphQL server reachable and schema valid', `${schema.types.length} types`);
+      pass('GraphQL server reachable and schema valid', `${schema?.types?.length ?? 0} types`);
     } else {
       fail('Introspection', 'Unexpected introspection response');
     }

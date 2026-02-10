@@ -14,7 +14,7 @@
       "rootDir": ".",
       "resolveJsonModule": true,
     },
-    "include": ["*.ts", "**/*.ts"],
+    "include": ["*.ts", "**/*.ts", "**/*.d.ts"],
     "exclude": [
       "node_modules",
       "dist"
