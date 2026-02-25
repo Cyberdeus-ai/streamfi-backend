@@ -42,7 +42,9 @@ if (isProduction || (fs.existsSync(sslKeyPath) && fs.existsSync(sslCertPath))) {
     }
 }
 
-app.use(cors());
+app.use(cors({
+    origin: process.env.FRONTEND_URL || 'http://localhost:3000'
+}));
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use('/api', router);
